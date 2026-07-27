@@ -1,3 +1,9 @@
-import type { RequestHandler } from 'msw'
+import { HttpResponse, http } from 'msw'
 
-export const handlers: RequestHandler[] = []
+import { catalogueProducts } from './catalogue.data'
+
+export const handlers = [
+  http.get('*/products', () => {
+    return HttpResponse.json(catalogueProducts)
+  }),
+]
