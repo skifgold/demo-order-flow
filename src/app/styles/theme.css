@@ -1,9 +1,33 @@
+@import './typography.css';
+
 :root {
   --color-canvas: #f8f3ea;
   --color-ink: #2b2422;
   --color-surface: #fffdf9;
   --color-border: #d9cfc0;
   --color-muted: #756b65;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --layout-content-inline-padding: 16px;
+  --layout-content-block-padding: 32px;
+  --layout-content-max-inline-size: 1152px;
+  --catalogue-card-min-inline-size: 352px;
+
+  --font-size-overline: 12px;
+  --font-size-body: 15px;
+  --font-size-meta: 14px;
+  --font-size-card-heading: 28px;
+  --font-size-display-min: 36px;
+  --font-size-display-max: 72px;
+  --letter-spacing-overline: 0.1em;
+  --letter-spacing-display: -0.04em;
+  --letter-spacing-heading: -0.03em;
   --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-display: Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
   color: var(--color-ink);

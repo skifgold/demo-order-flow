@@ -1,0 +1,36 @@
+.typography {
+  margin: 0;
+}
+
+.typography--overline {
+  color: var(--color-muted);
+  font-size: var(--font-size-overline);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-overline);
+  text-transform: uppercase;
+}
+
+.typography--display {
+  font-family: var(--font-display);
+  font-size: clamp(var(--font-size-display-min), 6vw, var(--font-size-display-max));
+  font-weight: 500;
+  letter-spacing: var(--letter-spacing-display);
+  line-height: 0.95;
+}
+
+.typography--heading {
+  font-family: var(--font-display);
+  font-size: var(--font-size-card-heading);
+  font-weight: 500;
+  letter-spacing: var(--letter-spacing-heading);
+  line-height: 1;
+}
+
+.typography--body {
+  font-size: var(--font-size-body);
+}
+
+.typography--meta {
+  color: var(--color-muted);
+  font-size: var(--font-size-meta);
+}

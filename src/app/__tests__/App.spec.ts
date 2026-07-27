@@ -26,7 +26,7 @@ describe('App', () => {
       },
     })
 
-    expect(wrapper.get('h1').text()).toBe('Artwork catalogue')
+    expect(wrapper.get('main.app-layout').get('h1').text()).toBe('Artwork catalogue')
   })
 
   it('renders the checkout placeholder at the checkout route', async () => {
@@ -38,6 +38,6 @@ describe('App', () => {
       },
     })
 
-    expect(wrapper.get('h1').text()).toBe('Checkout')
+    expect(wrapper.get('main.app-layout').get('h1').text()).toBe('Checkout')
   })
 })
