@@ -3,6 +3,9 @@ import { RouterView } from 'vue-router'
 
 import ViewErrorBoundary from './error-handling/ViewErrorBoundary.vue'
 import AppLayout from './layouts/AppLayout.vue'
+import { useBasketLifecycle } from './use-basket-lifecycle'
+
+useBasketLifecycle()
 </script>
 
 <template>

@@ -1,7 +1,10 @@
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import { createMemoryHistory } from 'vue-router'
+
+import { basketStorageKey, useBasketStore } from '@/features/basket'
 
 import App from '../App.vue'
 import { createAppRouter } from '../router'
@@ -11,6 +14,7 @@ describe('App', () => {
   const queryClient = new QueryClient()
 
   beforeEach(async () => {
+    window.localStorage.clear()
     await router.push('/')
     await router.isReady()
   })
@@ -22,7 +26,7 @@ describe('App', () => {
   it('renders the catalogue at the root route', () => {
     const wrapper = mount(App, {
       global: {
-        plugins: [router, [VueQueryPlugin, { queryClient }]],
+        plugins: [createPinia(), router, [VueQueryPlugin, { queryClient }]],
       },
     })
 
@@ -34,10 +38,31 @@ describe('App', () => {
 
     const wrapper = mount(App, {
       global: {
-        plugins: [router, [VueQueryPlugin, { queryClient }]],
+        plugins: [createPinia(), router, [VueQueryPlugin, { queryClient }]],
       },
     })
 
     expect(wrapper.get('main.app-layout').get('h1').text()).toBe('Checkout')
+  })
+
+  it('hydrates and reconciles a persisted Basket through app composition', async () => {
+    window.localStorage.setItem(
+      basketStorageKey,
+      JSON.stringify({
+        version: 1,
+        lines: [{ productId: 'modern-geometry-07', quantity: 99 }],
+      }),
+    )
+    const pinia = createPinia()
+    mount(App, {
+      global: {
+        plugins: [pinia, router, [VueQueryPlugin, { queryClient }]],
+      },
+    })
+    const basket = useBasketStore(pinia)
+
+    await vi.waitFor(() => {
+      expect(basket.lines).toEqual([{ productId: 'modern-geometry-07', quantity: 8 }])
+    })
   })
 })
