@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createMemoryHistory } from 'vue-router'
 
@@ -7,16 +8,21 @@ import { createAppRouter } from '../router'
 
 describe('App', () => {
   const router = createAppRouter(createMemoryHistory())
+  const queryClient = new QueryClient()
 
   beforeEach(async () => {
     await router.push('/')
     await router.isReady()
   })
 
-  it('renders the catalogue placeholder at the root route', () => {
+  afterEach(() => {
+    queryClient.clear()
+  })
+
+  it('renders the catalogue at the root route', () => {
     const wrapper = mount(App, {
       global: {
-        plugins: [router],
+        plugins: [router, [VueQueryPlugin, { queryClient }]],
       },
     })
 
@@ -28,7 +34,7 @@ describe('App', () => {
 
     const wrapper = mount(App, {
       global: {
-        plugins: [router],
+        plugins: [router, [VueQueryPlugin, { queryClient }]],
       },
     })
 
