@@ -24,9 +24,15 @@
     "check:full": "run-s check test:e2e"
   },
   "dependencies": {
+    "@primeuix/themes": "^1.2.5",
+    "@primevue/forms": "^4.5.5",
+    "@tanstack/vue-query": "^5.101.4",
+    "msw": "^2.15.0",
     "pinia": "^4.0.2",
+    "primevue": "^4.5.5",
     "vue": "^3.5.34",
-    "vue-router": "^5.2.0"
+    "vue-router": "^5.2.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
@@ -57,5 +63,10 @@
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
