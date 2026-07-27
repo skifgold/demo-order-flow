@@ -28,9 +28,8 @@ coverage
 
 .eslintcache
 
-# Cypress
-/cypress/videos/
-/cypress/screenshots/
+# Playwright
+.playwright-cli
 
 # Vitest
 __screenshots__/
