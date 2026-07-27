@@ -15,6 +15,7 @@ const props = defineProps<{
 const basket = useBasketStore()
 const quantity = computed(() => basket.quantityFor(props.product.id))
 const isUnavailable = computed(() => props.product.availableQuantity === 0)
+const isSelected = computed(() => quantity.value > 0)
 const hasReachedAvailability = computed(
   () => quantity.value >= props.product.availableQuantity,
 )
@@ -41,7 +42,7 @@ function increaseQuantity(): void {
 </script>
 
 <template>
-  <article class="artwork-card">
+  <article class="artwork-card" :class="{ 'artwork-card--selected': isSelected }">
     <div class="artwork-card__image-frame">
       <img class="artwork-card__image" :src="product.imagePath" :alt="`Artwork: ${product.name}`" width="1122"
         height="1402" loading="lazy" />
@@ -59,22 +60,23 @@ function increaseQuantity(): void {
       <template v-if="isUnavailable">Unavailable</template>
       <template v-else>{{ product.availableQuantity }} available</template>
     </p>
-    <p class="artwork-card__selection typography typography--meta">
-      <template v-if="quantity > 0">Selected: {{ quantity }}</template>
+    <p class="artwork-card__selection typography typography--meta" aria-live="polite">
+      <template v-if="isSelected">
+        In your basket · {{ quantity }} {{ quantity === 1 ? 'print' : 'prints' }}
+      </template>
       <template v-else>Not yet selected</template>
     </p>
-    <Button label="Add to basket" :disabled="isUnavailable || hasReachedAvailability"
-      :aria-label="`Add ${product.name} to basket`" @click="addToBasket" />
-    <div v-if="quantity > 0" class="artwork-card__quantity" role="group" :aria-label="`Quantity for ${product.name}`">
-      <Button label="−" severity="secondary" :aria-label="`Decrease quantity of ${product.name}`"
-        @click="decreaseQuantity" />
-      <output :aria-label="`${product.name} quantity`">{{ quantity }}</output>
-      <Button label="+" severity="secondary" :disabled="hasReachedAvailability"
-        :aria-label="`Increase quantity of ${product.name}`" @click="increaseQuantity" />
+    <div class="artwork-card__actions">
+      <Button v-if="!isSelected" label="Add to basket" :disabled="isUnavailable"
+        :aria-label="`Add ${product.name} to basket`" @click="addToBasket" />
+      <div v-else class="artwork-card__quantity" role="group" :aria-label="`Quantity for ${product.name}`">
+        <Button label="−" severity="secondary" :aria-label="`Decrease quantity of ${product.name}`"
+          @click="decreaseQuantity" />
+        <output :aria-label="`${product.name} quantity`">{{ quantity }}</output>
+        <Button label="+" severity="secondary" :disabled="hasReachedAvailability"
+          :aria-label="`Increase quantity of ${product.name}`" @click="increaseQuantity" />
+      </div>
     </div>
-    <p v-if="quantity > 0 && hasReachedAvailability" class="artwork-card__limit typography typography--meta">
-      Maximum available quantity selected.
-    </p>
   </article>
 </template>
 
@@ -87,6 +89,13 @@ function increaseQuantity(): void {
   padding: var(--space-6);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.artwork-card--selected {
+  border-color: var(--color-accent);
+  background: var(--color-selection);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
 }
 
 .artwork-card__image-frame {
@@ -106,9 +115,12 @@ function increaseQuantity(): void {
   margin-top: auto;
 }
 
-.artwork-card__selection,
-.artwork-card__limit {
+.artwork-card__selection {
   margin: 0;
+}
+
+.artwork-card__actions {
+  min-block-size: 2.5rem;
 }
 
 .artwork-card__quantity {

@@ -135,6 +135,8 @@ describe('CatalogueView', () => {
 
     expect(wrapper.get('[aria-label="Basket summary"]').text()).toContain('1 Artwork selected')
     expect(wrapper.get(`[aria-label="${artworkName} quantity"]`).text()).toBe('1')
+    expect(wrapper.get('.artwork-card--selected').text()).toContain('In your basket · 1 print')
+    expect(wrapper.find(`[aria-label="Add ${artworkName} to basket"]`).exists()).toBe(false)
 
     await wrapper.get(`[aria-label="Increase quantity of ${artworkName}"]`).trigger('click')
 
