@@ -70,6 +70,7 @@ export const OrderValidationErrorResponseSchema = z.object({
 export const OrderConflictErrorResponseSchema = z.object({
   type: z.literal('conflict'),
   message: z.string().min(1),
+  affectedProductIds: z.array(z.string().min(1)).default([]),
 })
 
 export type AcceptedOrder = z.infer<typeof OrderResponseSchema>

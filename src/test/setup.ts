@@ -2,6 +2,7 @@ import { afterAll, afterEach, beforeAll } from 'vitest'
 
 import { InMemoryStorage } from './in-memory-storage'
 import { server } from './msw-server'
+import { resetDemoScenarios } from '@/mocks/demo-scenarios'
 
 if (window.localStorage === undefined) {
   Object.defineProperty(window, 'localStorage', {
@@ -27,5 +28,8 @@ if (window.matchMedia === undefined) {
 }
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
+afterEach(() => {
+  server.resetHandlers()
+  resetDemoScenarios()
+})
 afterAll(() => server.close())

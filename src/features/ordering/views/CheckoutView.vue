@@ -22,8 +22,10 @@ const {
   issues,
   lines,
   removeLine,
+  recoverOrderConflict,
   refetch,
   reviewBasket,
+  reviewBasketAfterConflict,
   summary,
   updateGiftOptions,
   updateLine,
@@ -35,10 +37,11 @@ const {
   confirmation,
   continueShopping,
   isSubmitting,
+  isSubmissionBlocked,
+  recovery,
   returnToConfiguration,
   serverIssues,
   setCustomerDetails,
-  submissionMessage,
   submitOrder,
 } = useCheckoutCustomerDetails({
   router,
@@ -46,6 +49,7 @@ const {
   products,
   configuration: computed(() => draft.configuration),
   draft,
+  onConflict: recoverOrderConflict,
 })
 </script>
 
@@ -83,10 +87,13 @@ const {
     :configuration="draft.configuration"
     :summary="summary"
     :is-submitting="isSubmitting"
+    :is-submission-blocked="isSubmissionBlocked"
     :server-issues="serverIssues"
-    :submission-message="submissionMessage"
+    :recovery="recovery"
+    :highlighted-product-ids="draft.orderConflict?.affectedProductIds"
     @back="returnToConfiguration"
     @checkpoint="setCustomerDetails"
+    @review-basket="reviewBasketAfterConflict"
     @submit="submitOrder"
   />
 </template>

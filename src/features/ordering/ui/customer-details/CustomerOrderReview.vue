@@ -19,7 +19,9 @@ const props = defineProps<{
   configuration: OrderConfiguration
   summary: OrderSummary
   disabled: boolean
+  showSubmitAction: boolean
   issues: readonly FormIssue[]
+  highlightedProductIds?: readonly string[]
 }>()
 
 const giftOptionsSummary = computed(() =>
@@ -48,7 +50,12 @@ const termsError = computed(
     >
       Order summary
     </h2>
-    <OrderSummaryItems :lines="lines" :configuration="configuration" :summary="summary" />
+    <OrderSummaryItems
+      :lines="lines"
+      :configuration="configuration"
+      :summary="summary"
+      :highlighted-product-ids="highlightedProductIds"
+    />
 
     <p
       v-if="giftOptionsSummary.length > 0"
@@ -60,6 +67,7 @@ const termsError = computed(
     <OrderSummaryTotals :configuration="configuration" :summary="summary" :show-hint="false" />
     <CustomerTermsField :disabled="disabled" :server-error="termsError" />
     <Button
+      v-if="showSubmitAction"
       class="customer-order-review__submit typography typography--body-x-large"
       data-testid="submit-order"
       :label="'Place order · ' + formatGbp(summary.total)"

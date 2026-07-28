@@ -36,7 +36,7 @@ describe('postOrder', () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(jsonResponse(acceptedOrder))
     vi.stubGlobal('fetch', fetchMock)
 
-    await expect(postOrder(payload)).resolves.toEqual({ kind: 'accepted', order: acceptedOrder })
+    await expect(postOrder(payload)).resolves.toEqual(acceptedOrder)
     expect(fetchMock).toHaveBeenCalledWith(
       expect.any(URL),
       expect.objectContaining({ method: 'POST' }),
@@ -62,27 +62,38 @@ describe('postOrder', () => {
     await expect(postOrder(payload)).rejects.toBeInstanceOf(ServerError)
   })
 
-  it('returns field errors as a validation result', async () => {
+  it('throws typed field errors for the checkout recovery flow', async () => {
     const errors = [{ field: 'customer.email', message: 'Use a different email address.' }]
     vi.stubGlobal(
       'fetch',
       vi.fn<typeof fetch>().mockResolvedValue(jsonResponse({ type: 'validation', errors }, 422)),
     )
 
-    await expect(postOrder(payload)).resolves.toEqual({ kind: 'validation', errors })
+    await expect(postOrder(payload)).rejects.toMatchObject({
+      type: 'order-validation',
+      issues: errors,
+    })
   })
 
-  it('returns a conflict result when the order changed before submission', async () => {
+  it('throws a typed conflict with affected Basket Lines', async () => {
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn<typeof fetch>()
-        .mockResolvedValue(
-          jsonResponse({ type: 'conflict', message: 'Availability changed.' }, 409),
+      vi.fn<typeof fetch>().mockResolvedValue(
+        jsonResponse(
+          {
+            type: 'conflict',
+            message: 'Availability changed.',
+            affectedProductIds: ['coastal-light'],
+          },
+          409,
         ),
+      ),
     )
 
-    await expect(postOrder(payload)).resolves.toEqual({ kind: 'conflict' })
+    await expect(postOrder(payload)).rejects.toMatchObject({
+      type: 'order-conflict',
+      affectedProductIds: ['coastal-light'],
+    })
   })
 })
 

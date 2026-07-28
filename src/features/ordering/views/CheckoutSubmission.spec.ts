@@ -2,9 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { delay, HttpResponse, http } from 'msw'
 
 import { server } from '@/test/msw-server'
+import * as observability from '@/shared/observability/report-unexpected-error'
+import { catalogueProducts } from '@/mocks/catalogue.data'
 
 import {
   choosePrintOnlyA4Matte,
+  expectFocusOn,
   mountCheckout,
   waitForConfiguration,
 } from '../test-support/checkout-view'
@@ -46,6 +49,7 @@ describe('Checkout submission', () => {
   afterEach(() => {
     document.body.innerHTML = ''
     window.localStorage.clear()
+    vi.restoreAllMocks()
   })
 
   it('does not submit incomplete customer details', async () => {
@@ -173,6 +177,7 @@ describe('Checkout submission', () => {
   })
 
   it('shows safe form-level feedback for an unrecognised 422 field', async () => {
+    const reportUnexpectedError = vi.spyOn(observability, 'reportUnexpectedError')
     server.use(
       http.post('*/orders', () =>
         HttpResponse.json(
@@ -192,41 +197,109 @@ describe('Checkout submission', () => {
     })
 
     expect(wrapper.text()).not.toContain('Raw backend message.')
+    expect(reportUnexpectedError).toHaveBeenCalledOnce()
+    expect(reportUnexpectedError).toHaveBeenCalledWith({
+      operation: 'order-submission',
+      errorType: 'order-validation',
+    })
   })
 
   it('keeps the draft available when the server reports an order conflict', async () => {
+    let productRequestCount = 0
     server.use(
+      http.get('*/products', () => {
+        productRequestCount += 1
+        return HttpResponse.json(catalogueProducts)
+      }),
       http.post('*/orders', () =>
-        HttpResponse.json({ type: 'conflict', message: 'Availability changed.' }, { status: 409 }),
+        HttpResponse.json(
+          {
+            type: 'conflict',
+            message: 'Availability changed.',
+            affectedProductIds: ['modern-geometry-07'],
+          },
+          { status: 409 },
+        ),
       ),
     )
 
-    const { basket, draft, wrapper } = await submitValidOrder()
+    const { basket, draft, router, wrapper } = await submitValidOrder()
 
     await vi.waitFor(() => {
       expect(wrapper.text()).toContain(
-        'This order needs review because availability or pricing may have changed.',
+        'Modern Geometry No. 7 may have changed availability or price.',
       )
     })
 
     expect(basket.isEmpty).toBe(false)
     expect(draft.customerDetails.fullName).toBe('Maya Chen')
+    expect(draft.orderConflict?.affectedProductIds).toEqual(['modern-geometry-07'])
+    expect(wrapper.get('[role="alert"]').classes()).toContain('submission-recovery')
+    await expectFocusOn(wrapper.get('[role="alert"]').element)
+    expect(wrapper.get('[data-testid="submit-order"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('.order-summary-items__line--affected').exists()).toBe(true)
+    expect(productRequestCount).toBeGreaterThanOrEqual(2)
+
+    await wrapper.get('[role="alert"] button').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.name).toBe('catalogue'))
+    expect(draft.orderConflict).toBeUndefined()
   })
 
   it.each([
-    ['a network failure', () => HttpResponse.error()],
-    ['a server failure', () => HttpResponse.json({}, { status: 500 })],
-  ])('preserves work after %s', async (_description, response) => {
+    ['a network failure', () => HttpResponse.error(), 'We could not reach the order service.'],
+    [
+      'a server failure',
+      () => HttpResponse.json({}, { status: 500 }),
+      'We could not place your order.',
+    ],
+  ])('preserves work after %s', async (_description, response, message) => {
+    const reportUnexpectedError = vi.spyOn(observability, 'reportUnexpectedError')
     server.use(http.post('*/orders', response))
 
     const { basket, draft, wrapper } = await submitValidOrder()
 
     await vi.waitFor(() => {
-      expect(wrapper.text()).toContain('We could not place your order.')
+      expect(wrapper.text()).toContain(message)
     })
 
     expect(wrapper.find('#order-confirmation-title').exists()).toBe(false)
     expect(basket.isEmpty).toBe(false)
     expect(draft.customerDetails.fullName).toBe('Maya Chen')
+    expect(reportUnexpectedError).toHaveBeenCalledOnce()
+    await expectFocusOn(wrapper.get('[role="alert"]').element)
+    expect(wrapper.find('[data-testid="submit-order"]').exists()).toBe(false)
+  })
+
+  it('retries a network failure without losing protected customer input', async () => {
+    let requestCount = 0
+    server.use(
+      http.post('*/orders', () => {
+        requestCount += 1
+
+        if (requestCount === 1) {
+          return HttpResponse.error()
+        }
+
+        return HttpResponse.json(
+          {
+            orderNumber: 'ORD-RETRY',
+            acceptedAt: '2026-07-28T10:00:00.000Z',
+            estimatedDeliveryDate: '2026-08-03',
+            total: 4195,
+          },
+          { status: 201 },
+        )
+      }),
+    )
+
+    const { wrapper } = await submitValidOrder()
+
+    await vi.waitFor(() => expect(wrapper.get('[role="alert"]').text()).toContain('Try again'))
+    await wrapper.get('[role="alert"] button').trigger('click')
+
+    await vi.waitFor(() => {
+      expect(wrapper.get('#order-confirmation-title').text()).toBe('Thank you for your order')
+    })
+    expect(requestCount).toBe(2)
   })
 })

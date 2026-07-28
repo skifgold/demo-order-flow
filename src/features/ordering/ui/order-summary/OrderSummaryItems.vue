@@ -8,6 +8,7 @@ const props = defineProps<{
   lines: readonly CheckoutLine[]
   configuration: OrderConfiguration
   summary: OrderSummary
+  highlightedProductIds?: readonly string[]
 }>()
 
 function summaryLine(productId: string) {
@@ -45,7 +46,13 @@ function configurationDetails(productId: string): string[] {
 
 <template>
   <ul class="order-summary-items">
-    <li v-for="line in lines" :key="line.product.id">
+    <li
+      v-for="line in lines"
+      :key="line.product.id"
+      :class="{
+        'order-summary-items__line--affected': highlightedProductIds?.includes(line.product.id),
+      }"
+    >
       <img :src="line.product.imagePath" :alt="`Artwork: ${line.product.name}`" />
       <div>
         <strong>{{ line.product.name }}</strong>
@@ -82,6 +89,14 @@ function configurationDetails(productId: string): string[] {
   align-items: start;
   padding-bottom: 28px;
   border-bottom: 1px solid var(--color-border);
+}
+
+.order-summary-items__line--affected {
+  padding: var(--space-3);
+  margin-inline: calc(-1 * var(--space-3));
+  background: var(--color-warning-surface);
+  border: 1px solid var(--color-warning-border);
+  border-radius: 4px;
 }
 
 .order-summary-items img {

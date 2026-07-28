@@ -20,6 +20,10 @@ import {
 
 export type CheckoutStep = 'configuration' | 'customer-details'
 
+export type OrderConflict = {
+  affectedProductIds: readonly string[]
+}
+
 function cloneOrderConfiguration(configuration: OrderConfiguration): OrderConfiguration {
   return {
     lines: Object.fromEntries(
@@ -34,6 +38,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
   const step = ref<CheckoutStep>('configuration')
   const configuration = ref<OrderConfiguration>(createEmptyOrderConfiguration())
   const customerDetails = ref<CustomerDetails>(createEmptyCustomerDetails())
+  const orderConflict = ref<OrderConflict>()
 
   function setLineConfiguration({
     product,
@@ -77,14 +82,13 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
 
     if (hasMaterialConfigurationChange) {
       customerDetails.value.termsAccepted = false
+      step.value = 'configuration'
     }
 
     if (basketLines.length === 0) {
       cancelDraft()
       return
     }
-
-    step.value = 'configuration'
   }
 
   function checkpointConfiguration({
@@ -130,10 +134,19 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     customerDetails.value = { ...nextCustomerDetails }
   }
 
+  function recordOrderConflict(conflict: OrderConflict): void {
+    orderConflict.value = { affectedProductIds: [...conflict.affectedProductIds] }
+  }
+
+  function resolveOrderConflict(): void {
+    orderConflict.value = undefined
+  }
+
   function cancelDraft(): void {
     step.value = 'configuration'
     configuration.value = createEmptyOrderConfiguration()
     customerDetails.value = createEmptyCustomerDetails()
+    resolveOrderConflict()
   }
 
   function completeDraft(): void {
@@ -144,6 +157,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     step,
     configuration,
     customerDetails,
+    orderConflict,
     setLineConfiguration,
     setShipping,
     setGiftOptions,
@@ -152,6 +166,8 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     advanceToCustomerDetails,
     returnToConfiguration,
     setCustomerDetails,
+    recordOrderConflict,
+    resolveOrderConflict,
     cancelDraft,
     completeDraft,
     cloneOrderConfiguration: () => cloneOrderConfiguration(configuration.value),

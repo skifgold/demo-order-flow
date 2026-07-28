@@ -10,9 +10,14 @@ import CatalogueEmptyState from '../ui/CatalogueEmptyState.vue'
 import CatalogueErrorState from '../ui/CatalogueErrorState.vue'
 import CatalogueHeader from '../ui/CatalogueHeader.vue'
 import CatalogueLoadingState from '../ui/CatalogueLoadingState.vue'
+import CatalogueRefreshWarning from '../ui/CatalogueRefreshWarning.vue'
 
-const { data, isError, isPending, refetch } = useProductsQuery()
+const { data, isError, isFetching, isPending, refetch } = useProductsQuery()
 const products = computed(() => data.value ?? [])
+const hasRefreshFailure = computed(() => isError.value && data.value !== undefined)
+const isRefreshingCatalogue = computed(
+  () => data.value !== undefined && isFetching.value && !hasRefreshFailure.value,
+)
 const basket = useBasketStore()
 const router = useRouter()
 
@@ -34,11 +39,11 @@ function beginCheckout(): void {
 
 <template>
   <section class="catalogue" aria-labelledby="catalogue-title">
-    <CatalogueHeader />
+    <CatalogueHeader :is-refreshing="isRefreshingCatalogue" />
 
     <CatalogueLoadingState v-if="isPending" />
 
-    <CatalogueErrorState v-else-if="isError" @retry="retryLoadingProducts" />
+    <CatalogueErrorState v-else-if="isError && !hasRefreshFailure" @retry="retryLoadingProducts" />
 
     <CatalogueEmptyState v-else-if="products.length === 0" />
 
@@ -47,6 +52,11 @@ function beginCheckout(): void {
         {{ savedBasketRecoveryMessage }}
       </p>
 
+      <CatalogueRefreshWarning
+        v-if="hasRefreshFailure"
+        :is-retrying="isFetching"
+        @retry="retryLoadingProducts"
+      />
       <BasketSummary @checkout="beginCheckout" />
 
       <ul class="catalogue__grid" aria-label="Available Artworks">
@@ -54,7 +64,6 @@ function beginCheckout(): void {
           <ArtworkCard :product="product" />
         </li>
       </ul>
-
     </template>
   </section>
 </template>
@@ -62,8 +71,10 @@ function beginCheckout(): void {
 <style scoped>
 .catalogue__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit,
-      minmax(min(100%, var(--catalogue-card-min-inline-size)), 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--catalogue-card-min-inline-size)), 1fr)
+  );
   gap: var(--space-4);
   padding: 0;
   list-style: none;

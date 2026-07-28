@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import Form from '@primevue/forms/form'
 import type { FormInstance, FormSubmitEvent } from '@primevue/forms/form'
 import Button from 'primevue/button'
-import Message from 'primevue/message'
 
 import type {
   CustomerDetails,
@@ -16,7 +15,9 @@ import type { FormIssue } from '../form/use-form-issues'
 
 import CustomerDetailsFields from './CustomerDetailsFields.vue'
 import CustomerOrderReview from './CustomerOrderReview.vue'
+import SubmissionRecoveryBanner from './SubmissionRecoveryBanner.vue'
 import { customerDetailsResolver, toCustomerDetails } from './customer-details-form'
+import type { SubmissionRecovery } from './submission-recovery'
 
 const props = defineProps<{
   customerDetails: CustomerDetails
@@ -24,17 +25,28 @@ const props = defineProps<{
   configuration: OrderConfiguration
   summary: OrderSummary
   isSubmitting: boolean
+  isSubmissionBlocked: boolean
   serverIssues: readonly FormIssue[]
-  submissionMessage?: string
+  recovery?: SubmissionRecovery
+  highlightedProductIds?: readonly string[]
 }>()
 
 const emit = defineEmits<{
   submit: [customerDetails: CustomerDetails]
   checkpoint: [customerDetails: CustomerDetails]
   back: [customerDetails: CustomerDetails]
+  reviewBasket: []
 }>()
 
 const form = ref<FormInstance>()
+const affectedArtworkNames = computed(() =>
+  props.lines
+    .filter((line) => props.highlightedProductIds?.includes(line.product.id))
+    .map((line) => line.product.name),
+)
+const hasRetryAction = computed(
+  () => props.recovery?.kind === 'network' || props.recovery?.kind === 'system',
+)
 
 function currentCustomerDetails(): CustomerDetails {
   const states = form.value?.states ?? {}
@@ -89,10 +101,18 @@ function onSubmit(event: FormSubmitEvent): void {
     >
       <div class="customer-details-step__layout">
         <div class="customer-details-step__content">
-          <Message v-if="submissionMessage !== undefined" severity="error" role="alert">
-            {{ submissionMessage }}
-          </Message>
-          <CustomerDetailsFields :disabled="isSubmitting" :issues="serverIssues" />
+          <SubmissionRecoveryBanner
+            v-if="recovery !== undefined"
+            :recovery="recovery"
+            :disabled="isSubmitting"
+            :affected-artwork-names="affectedArtworkNames"
+            @retry="$emit('submit', currentCustomerDetails())"
+            @review-basket="$emit('reviewBasket')"
+          />
+          <CustomerDetailsFields
+            :disabled="isSubmitting || isSubmissionBlocked"
+            :issues="serverIssues"
+          />
           <footer class="customer-details-step__actions">
             <Button
               class="customer-details-step__back"
@@ -101,7 +121,7 @@ function onSubmit(event: FormSubmitEvent): void {
               severity="secondary"
               outlined
               type="button"
-              :disabled="isSubmitting"
+              :disabled="isSubmitting || isSubmissionBlocked"
               @click="$emit('back', currentCustomerDetails())"
             />
           </footer>
@@ -110,8 +130,10 @@ function onSubmit(event: FormSubmitEvent): void {
           :lines="lines"
           :configuration="configuration"
           :summary="summary"
-          :disabled="isSubmitting"
+          :disabled="isSubmitting || isSubmissionBlocked"
           :issues="serverIssues"
+          :highlighted-product-ids="highlightedProductIds"
+          :show-submit-action="!hasRetryAction"
         />
       </div>
     </Form>

@@ -12,6 +12,9 @@
   --color-error-ink: #5d1d28;
   --color-error-surface: #fae7e8;
   --color-error-border: #9b3c42;
+  --color-warning-ink: #705100;
+  --color-warning-surface: #fff7df;
+  --color-warning-border: #b87900;
 
   --space-1: 4px;
   --space-2: 8px;

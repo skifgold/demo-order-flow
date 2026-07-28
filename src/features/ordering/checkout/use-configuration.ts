@@ -88,6 +88,23 @@ export function useCheckoutConfiguration(router: Router) {
     void router.push({ name: 'catalogue' })
   }
 
+  async function recoverOrderConflict(affectedProductIds: readonly string[]): Promise<void> {
+    draft.recordOrderConflict({
+      affectedProductIds:
+        affectedProductIds.length > 0
+          ? affectedProductIds
+          : basket.lines.map((line) => line.productId),
+    })
+    await refetch()
+    basket.reconcile(products.value)
+    draft.reconcileWithBasket({ products: products.value, basketLines: basket.lines })
+  }
+
+  function reviewBasketAfterConflict(): void {
+    draft.resolveOrderConflict()
+    void router.push({ name: 'catalogue' })
+  }
+
   function browseArtworks(): void {
     void router.push({ name: 'catalogue' })
   }
@@ -104,7 +121,9 @@ export function useCheckoutConfiguration(router: Router) {
     products,
     refetch,
     removeLine,
+    recoverOrderConflict,
     reviewBasket,
+    reviewBasketAfterConflict,
     summary,
     updateGiftOptions,
     updateLine,

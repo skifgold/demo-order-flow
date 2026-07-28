@@ -2,6 +2,12 @@ import { computed, ref, type ComputedRef } from 'vue'
 
 import type { BasketLine } from '@/features/basket'
 import type { Product } from '@/features/catalogue/api/product.contract'
+import { isRequestCancellation } from '@/shared/errors/is-request-cancellation'
+import { NetworkError } from '@/shared/errors/network-error'
+import { OrderConflictError } from '@/shared/errors/order-conflict-error'
+import { OrderValidationError } from '@/shared/errors/order-validation-error'
+import { reportUnexpectedError } from '@/shared/observability/report-unexpected-error'
+import { unexpectedErrorContext } from '@/shared/observability/should-report-error'
 
 import type { AcceptedOrder } from '../api/post-order.contract'
 import { useSubmitOrder } from '../queries/use-submit-order'
@@ -11,6 +17,7 @@ import {
   type OrderConfiguration,
 } from '../domain/order-configuration'
 import { mapServerFieldErrors } from '../ui/customer-details/customer-details-form'
+import type { SubmissionRecovery } from '../ui/customer-details/submission-recovery'
 import type { FormIssue } from '../ui/form/use-form-issues'
 
 export function useCheckoutSubmission({
@@ -18,25 +25,28 @@ export function useCheckoutSubmission({
   basketLines,
   configuration,
   onSuccess,
+  onConflict,
 }: {
   products: ComputedRef<readonly Product[]>
   basketLines: ComputedRef<readonly BasketLine[]>
   configuration: ComputedRef<OrderConfiguration>
   onSuccess: () => void
+  onConflict: (affectedProductIds: readonly string[]) => Promise<void>
 }) {
   const submitOrder = useSubmitOrder()
   const confirmation = ref<AcceptedOrder>()
   const serverIssues = ref<readonly FormIssue[]>([])
-  const submissionMessage = ref<string>()
+  const recovery = ref<SubmissionRecovery>()
   const isSubmitting = computed(() => submitOrder.isPending.value)
+  const isSubmissionBlocked = computed(() => recovery.value?.kind === 'conflict')
 
   async function submit(customerDetails: CustomerDetails): Promise<void> {
-    if (isSubmitting.value) {
+    if (isSubmitting.value || isSubmissionBlocked.value) {
       return
     }
 
     serverIssues.value = []
-    submissionMessage.value = undefined
+    recovery.value = undefined
 
     const payload = createOrderPayload({
       products: products.value,
@@ -46,30 +56,38 @@ export function useCheckoutSubmission({
     })
 
     try {
-      const result = await submitOrder.mutateAsync(payload)
-
-      switch (result.kind) {
-        case 'accepted':
-          confirmation.value = result.order
-          onSuccess()
-          return
-        case 'validation': {
-          const mapped = mapServerFieldErrors(result.errors)
-          serverIssues.value = mapped.issues
-          submissionMessage.value = mapped.hasUnknownField
-            ? 'We could not apply one or more order checks. Review your details and try again.'
-            : undefined
-          return
-        }
-        case 'conflict':
-          submissionMessage.value =
-            'This order needs review because availability or pricing may have changed.'
-          return
-      }
-    } catch {
+      confirmation.value = await submitOrder.mutateAsync(payload)
+      onSuccess()
+    } catch (error) {
       serverIssues.value = []
-      submissionMessage.value =
-        'We could not place your order. Your details are still here, so please try again.'
+
+      if (error instanceof OrderValidationError) {
+        const mapped = mapServerFieldErrors(error.issues)
+        serverIssues.value = mapped.issues
+        if (mapped.hasUnknownField) {
+          reportUnexpectedError({ operation: 'order-submission', errorType: error.type })
+          recovery.value = { kind: 'validation' }
+        }
+        return
+      }
+
+      if (error instanceof OrderConflictError) {
+        await onConflict(error.affectedProductIds)
+        recovery.value = { kind: 'conflict' }
+        return
+      }
+
+      if (isRequestCancellation(error)) {
+        return
+      }
+
+      const context = unexpectedErrorContext(error, 'order-submission')
+
+      if (context !== undefined) {
+        reportUnexpectedError(context)
+      }
+
+      recovery.value = error instanceof NetworkError ? { kind: 'network' } : { kind: 'system' }
     }
   }
 
@@ -81,8 +99,9 @@ export function useCheckoutSubmission({
     clearConfirmation,
     confirmation,
     isSubmitting,
+    isSubmissionBlocked,
     serverIssues,
-    submissionMessage,
+    recovery,
     submit,
   }
 }

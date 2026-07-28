@@ -16,12 +16,14 @@ export function useCheckoutCustomerDetails({
   products,
   configuration,
   draft,
+  onConflict,
 }: {
   router: Router
   basket: ReturnType<typeof useBasketStore>
   products: ComputedRef<readonly Product[]>
   configuration: ComputedRef<OrderConfiguration>
   draft: ReturnType<typeof useOrderDraftStore>
+  onConflict: (affectedProductIds: readonly string[]) => Promise<void>
 }) {
   const submission = useCheckoutSubmission({
     products,
@@ -31,6 +33,7 @@ export function useCheckoutCustomerDetails({
       basket.clear()
       draft.completeDraft()
     },
+    onConflict,
   })
 
   function setCustomerDetails(customerDetails: CustomerDetails): void {
@@ -56,10 +59,11 @@ export function useCheckoutCustomerDetails({
     confirmation: submission.confirmation,
     continueShopping,
     isSubmitting: submission.isSubmitting,
+    isSubmissionBlocked: submission.isSubmissionBlocked,
+    recovery: submission.recovery,
     returnToConfiguration,
     serverIssues: submission.serverIssues,
     setCustomerDetails,
-    submissionMessage: submission.submissionMessage,
     submitOrder,
   }
 }

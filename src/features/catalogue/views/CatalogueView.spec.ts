@@ -8,7 +8,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { catalogueProducts } from '@/mocks/catalogue.data'
 import { server } from '@/test/msw-server'
 import { createAppRouter } from '@/app/router'
+import * as observability from '@/shared/observability/report-unexpected-error'
 
+import { productKeys } from '../api/product-keys'
 import CatalogueView from './CatalogueView.vue'
 
 const queryClient = new QueryClient({
@@ -22,6 +24,8 @@ const queryClient = new QueryClient({
 
 afterEach(() => {
   queryClient.clear()
+  document.body.innerHTML = ''
+  vi.restoreAllMocks()
 })
 
 beforeEach(() => {
@@ -30,6 +34,7 @@ beforeEach(() => {
 
 function mountCatalogue() {
   return mount(CatalogueView, {
+    attachTo: document.body,
     global: {
       plugins: [
         createPinia(),
@@ -88,6 +93,7 @@ describe('CatalogueView', () => {
   })
 
   it('retries an initial failure once and lets the customer retry manually', async () => {
+    const reportUnexpectedError = vi.spyOn(observability, 'reportUnexpectedError')
     let requestCount = 0
     server.use(
       http.get('*/products', () => {
@@ -106,6 +112,11 @@ describe('CatalogueView', () => {
       expect(wrapper.get('[role="alert"]').text()).toContain('We could not load the catalogue')
     })
     expect(requestCount).toBe(2)
+    expect(reportUnexpectedError).toHaveBeenCalledOnce()
+    expect(reportUnexpectedError).toHaveBeenCalledWith({
+      operation: 'catalogue-load',
+      errorType: 'server',
+    })
 
     await wrapper.get('button').trigger('click')
 
@@ -115,6 +126,70 @@ describe('CatalogueView', () => {
       )
     })
     expect(requestCount).toBe(3)
+  })
+
+  it('keeps cached Artworks visible after a refresh failure and retries without moving focus', async () => {
+    const wrapper = mountCatalogue()
+
+    await vi.waitFor(() => {
+      expect(wrapper.get('[aria-label="Available Artworks"]').findAll('li')).toHaveLength(
+        catalogueProducts.length,
+      )
+    })
+
+    const focusedButton = wrapper.get(`[aria-label="Add ${catalogueProducts[0]!.name} to basket"]`)
+    ;(focusedButton.element as HTMLElement).focus()
+    let refreshRequestCount = 0
+    server.use(
+      http.get('*/products', () => {
+        refreshRequestCount += 1
+
+        if (refreshRequestCount <= 2) {
+          return HttpResponse.json({ message: 'Service unavailable' }, { status: 503 })
+        }
+
+        return HttpResponse.json(catalogueProducts)
+      }),
+    )
+
+    await queryClient.invalidateQueries({ queryKey: productKeys.all })
+
+    await vi.waitFor(() => {
+      expect(wrapper.get('[role="status"]').text()).toContain('Couldn’t update the catalogue')
+    })
+    expect(wrapper.get('[aria-label="Available Artworks"]').findAll('li')).toHaveLength(
+      catalogueProducts.length,
+    )
+    expect(document.activeElement).toBe(focusedButton.element)
+
+    await wrapper.get('.catalogue-refresh-warning').get('button').trigger('click')
+
+    await vi.waitFor(() => {
+      expect(wrapper.find('.catalogue-refresh-warning').exists()).toBe(false)
+    })
+    expect(refreshRequestCount).toBe(3)
+  })
+
+  it('shows the refresh indicator in the catalogue header while cached Artworks update', async () => {
+    const wrapper = mountCatalogue()
+
+    await vi.waitFor(() => {
+      expect(wrapper.get('[aria-label="Available Artworks"]')).toBeTruthy()
+    })
+
+    server.use(
+      http.get('*/products', async () => {
+        await delay(100)
+
+        return HttpResponse.json(catalogueProducts)
+      }),
+    )
+
+    void queryClient.invalidateQueries({ queryKey: productKeys.all })
+
+    await vi.waitFor(() => {
+      expect(wrapper.get('.catalogue-header').text()).toContain('Refreshing availability…')
+    })
   })
 
   it('lets the customer select an Artwork, change its quantity, and begin checkout', async () => {

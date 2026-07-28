@@ -8,6 +8,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 import App from './app/App.vue'
 import { queryClient } from './app/query-client/queryClient'
 import router from './app/router'
+import { productKeys } from './features/catalogue'
 import './app/styles/theme.css'
 
 const OrderFlowTheme = definePreset(Aura, {
@@ -49,6 +50,24 @@ async function startApplication() {
   })
 
   app.mount('#app')
+
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('demo') === 'true') {
+    const { default: DemoControls } = await import('./mocks/DemoControls.vue')
+    const target = document.createElement('div')
+    target.id = 'demo-controls'
+    document.body.append(target)
+
+    const demoApp = createApp(DemoControls, {
+      refreshCatalogue: () => void queryClient.refetchQueries({ queryKey: productKeys.all }),
+    })
+    demoApp.use(PrimeVue, {
+      theme: {
+        preset: OrderFlowTheme,
+        options: { darkModeSelector: false },
+      },
+    })
+    demoApp.mount(target)
+  }
 }
 
 void startApplication()

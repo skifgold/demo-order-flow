@@ -1,4 +1,5 @@
 import { InvalidResponseError } from '@/shared/errors/invalid-response-error'
+import { isRequestCancellation } from '@/shared/errors/is-request-cancellation'
 import { NetworkError } from '@/shared/errors/network-error'
 
 type HttpRequest = {
@@ -62,8 +63,4 @@ async function readJson(response: Response): Promise<unknown> {
   } catch {
     throw new InvalidResponseError()
   }
-}
-
-function isRequestCancellation(error: unknown): error is DOMException {
-  return error instanceof DOMException && error.name === 'AbortError'
 }

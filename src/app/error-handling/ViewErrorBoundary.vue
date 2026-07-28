@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { onErrorCaptured, ref } from 'vue'
 
-const hasViewError = ref(false)
+import { reportUnexpectedError } from '@/shared/observability/report-unexpected-error'
+import { unexpectedErrorContext } from '@/shared/observability/should-report-error'
 
-onErrorCaptured(() => {
+const hasViewError = ref(false)
+let hasReportedViewError = false
+
+onErrorCaptured((error) => {
   hasViewError.value = true
+  const context = unexpectedErrorContext(error, 'view-render')
+
+  if (context !== undefined && !hasReportedViewError) {
+    hasReportedViewError = true
+    reportUnexpectedError(context)
+  }
+
   return false
 })
 
