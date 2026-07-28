@@ -33,7 +33,7 @@ describe('App', () => {
     expect(wrapper.get('main.app-layout').get('h1').text()).toBe('Artwork catalogue')
   })
 
-  it('renders the checkout placeholder at the checkout route', async () => {
+  it('guides a customer with an empty Basket back to Artwork selection at the checkout route', async () => {
     await router.push('/checkout')
 
     const wrapper = mount(App, {
@@ -42,7 +42,9 @@ describe('App', () => {
       },
     })
 
-    expect(wrapper.get('main.app-layout').get('h1').text()).toBe('Checkout')
+    await vi.waitFor(() => {
+      expect(wrapper.get('main.app-layout').get('h1').text()).toBe('Your Basket is empty')
+    })
   })
 
   it('hydrates and reconciles a persisted Basket through app composition', async () => {

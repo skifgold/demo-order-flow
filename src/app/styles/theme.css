@@ -8,6 +8,10 @@
   --color-muted: #756b65;
   --color-selection: #f1e7db;
   --color-accent: #6b4935;
+  --color-summary-surface: #eee8dd;
+  --color-error-ink: #5d1d28;
+  --color-error-surface: #fae7e8;
+  --color-error-border: #9b3c42;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -18,8 +22,11 @@
 
   --layout-content-inline-padding: 16px;
   --layout-content-block-padding: 32px;
-  --layout-content-max-inline-size: 1152px;
+  --layout-content-max-inline-size: 1440px;
   --catalogue-card-min-inline-size: 352px;
+  --layout-checkout-header-max-inline-size: 752px;
+  --layout-checkout-state-max-inline-size: 672px;
+  --layout-summary-min-inline-size: 280px;
 
   --font-size-overline: 12px;
   --font-size-body: 15px;
@@ -27,6 +34,8 @@
   --font-size-card-heading: 28px;
   --font-size-display-min: 36px;
   --font-size-display-max: 72px;
+  --font-size-checkout-heading-max: 68px;
+  --font-size-checkout-state-heading: 42px;
   --letter-spacing-overline: 0.1em;
   --letter-spacing-display: -0.04em;
   --letter-spacing-heading: -0.03em;
