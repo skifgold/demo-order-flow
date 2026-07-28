@@ -1,7 +1,7 @@
 import type { OrderPayload } from '../domain/order-configuration.types'
 import { InvalidResponseError } from '@/shared/errors/invalid-response-error'
-import { NetworkError } from '@/shared/errors/network-error'
 import { ServerError } from '@/shared/errors/server-error'
+import { httpClient } from '@/shared/http/http-client'
 
 import {
   OrderConflictErrorResponseSchema,
@@ -22,30 +22,9 @@ export async function postOrder(
   payload: OrderPayload,
   signal?: AbortSignal,
 ): Promise<PostOrderResult> {
-  let response: Response
+  const response = await httpClient.post({ url: ordersUrl, body: payload, signal })
 
-  try {
-    response = await fetch(ordersUrl, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal,
-    })
-  } catch (error) {
-    if (signal?.aborted) {
-      throw new DOMException('The request was cancelled.', 'AbortError')
-    }
-
-    if (isRequestCancellation(error)) {
-      throw error
-    }
-
-    throw new NetworkError()
-  }
-
-  const body = await readJson(response)
-
-  return toPostOrderResult(response.status, body)
+  return toPostOrderResult(response.status, await httpClient.readJson(response))
 }
 
 function toPostOrderResult(status: number, body: unknown): PostOrderResult {
@@ -89,16 +68,4 @@ function toConflictResult(body: unknown): PostOrderResult {
   }
 
   return { kind: 'conflict' }
-}
-
-async function readJson(response: Response): Promise<unknown> {
-  try {
-    return await response.json()
-  } catch {
-    throw new InvalidResponseError()
-  }
-}
-
-function isRequestCancellation(error: unknown): error is DOMException {
-  return error instanceof DOMException && error.name === 'AbortError'
 }
