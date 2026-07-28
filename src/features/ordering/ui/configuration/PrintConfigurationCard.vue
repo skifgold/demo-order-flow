@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import TrashIcon from '@primevue/icons/trash'
+import Button from 'primevue/button'
 
 import type { Product } from '@/features/catalogue/api/product.contract'
 import {
@@ -28,7 +30,10 @@ const props = defineProps<{
   issues: readonly ConfigurationIssue[]
 }>()
 
-defineEmits<{ update: [input: { field: keyof PrintConfiguration; value: string }] }>()
+defineEmits<{
+  update: [input: { field: keyof PrintConfiguration; value: string }]
+  remove: []
+}>()
 
 const presentationOptions: readonly SelectFieldOption[] = [
   { label: 'Print only', value: 'print-only' },
@@ -70,6 +75,18 @@ function sizeLabel(size: string): string {
 
 <template>
   <article class="print-configuration">
+    <Button
+      class="print-configuration__remove"
+      :aria-label="`Remove ${product.name} from Basket`"
+      :data-testid="`remove-artwork-${product.id}`"
+      severity="danger"
+      text
+      rounded
+      type="button"
+      @click="$emit('remove')"
+    >
+      <TrashIcon />
+    </Button>
     <div class="print-configuration__image-frame">
       <img :src="product.imagePath" :alt="`Artwork: ${product.name}`" width="1122" height="1402" />
     </div>
@@ -134,10 +151,11 @@ function sizeLabel(size: string): string {
 
 <style scoped>
 .print-configuration {
+  position: relative;
   display: grid;
   grid-template-columns: 228px minmax(0, 1fr);
   gap: 36px;
-  padding: 30px 24px;
+  padding: 54px 24px 30px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 10px;
@@ -160,6 +178,32 @@ function sizeLabel(size: string): string {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
+}
+
+:deep(.p-button.print-configuration__remove) {
+  position: absolute;
+  inset-block-start: var(--space-4);
+  inset-inline-end: var(--space-4);
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--color-error-border);
+}
+
+:deep(.p-button.print-configuration__remove svg) {
+  width: 20px;
+  height: 20px;
+}
+
+:deep(.p-button.print-configuration__remove:not(:disabled):hover) {
+  color: var(--color-error-ink);
+  background: var(--color-error-surface);
+}
+
+:deep(.p-button.print-configuration__remove:focus-visible) {
+  outline: 2px solid var(--color-error-border);
+  outline-offset: 2px;
 }
 
 .print-configuration__glazing {

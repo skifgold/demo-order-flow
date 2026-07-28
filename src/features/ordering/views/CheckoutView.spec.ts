@@ -76,6 +76,36 @@ describe('CheckoutView', () => {
     expect(wrapper.get('[data-testid="gift-options-fields"]').text()).toContain('Gift message')
   })
 
+  it('removes one Artwork while retaining the other configured items', async () => {
+    const { basket, wrapper } = await mountCheckout()
+
+    await waitForConfiguration(wrapper)
+    basket.add('coastal-light', 6)
+
+    await vi.waitFor(() => {
+      expect(wrapper.findAll('[data-testid^="remove-artwork-"]')).toHaveLength(2)
+    })
+
+    await wrapper.get('[data-testid="remove-artwork-modern-geometry-07"]').trigger('click')
+
+    await vi.waitFor(() => {
+      expect(basket.lines).toEqual([{ productId: 'coastal-light', quantity: 1 }])
+    })
+    expect(wrapper.find('[data-testid="remove-artwork-coastal-light"]').exists()).toBe(true)
+    expect(wrapper.find('#empty-basket-title').exists()).toBe(false)
+  })
+
+  it('returns to the empty Basket state after removing the final Artwork', async () => {
+    const { wrapper } = await mountCheckout()
+
+    await waitForConfiguration(wrapper)
+    await wrapper.get('[data-testid="remove-artwork-modern-geometry-07"]').trigger('click')
+
+    await vi.waitFor(() => {
+      expect(wrapper.get('#empty-basket-title').text()).toBe('Your Basket is empty')
+    })
+  })
+
   it('checkpoints configuration before reviewing the Basket and restores it on return', async () => {
     const { wrapper, router } = await mountCheckout({ throughApp: true })
 

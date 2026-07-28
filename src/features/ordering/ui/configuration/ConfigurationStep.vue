@@ -35,6 +35,7 @@ defineEmits<{
   updateGiftOptions: [giftOptions: GiftOptions]
   continue: []
   reviewBasket: []
+  removeLine: [productId: string]
 }>()
 
 const lines = toRef(props, 'lines')
@@ -74,6 +75,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
             :configuration="configuration.lines[line.product.id] ?? {}"
             :issues="issues"
             @update="$emit('updateLine', { productId: line.product.id, ...$event })"
+            @remove="$emit('removeLine', line.product.id)"
           />
 
           <footer class="configuration-step__actions">

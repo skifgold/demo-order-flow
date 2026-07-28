@@ -80,6 +80,12 @@ export function useCheckoutConfiguration(router: Router) {
     clearIssues()
   }
 
+  function removeLine(productId: string): void {
+    basket.remove(productId)
+    draft.reconcileWithBasket({ products: products.value, basketLines: basket.lines })
+    clearIssues()
+  }
+
   function continueToCustomerDetails(): void {
     issues.value = draft.advanceToCustomerDetails({
       products: products.value,
@@ -106,6 +112,7 @@ export function useCheckoutConfiguration(router: Router) {
     issues,
     lines,
     refetch,
+    removeLine,
     reviewBasket,
     summary,
     updateGiftOptions,

@@ -17,6 +17,7 @@ const {
   isPending,
   issues,
   lines,
+  removeLine,
   refetch,
   reviewBasket,
   summary,
@@ -44,6 +45,7 @@ const {
     @update-gift-options="updateGiftOptions"
     @continue="continueToCustomerDetails"
     @review-basket="reviewBasket"
+    @remove-line="removeLine"
   />
 
   <CustomerDetailsPlaceholder v-else @back="draft.returnToConfiguration" />
