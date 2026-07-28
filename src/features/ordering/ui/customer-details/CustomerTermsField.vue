@@ -50,6 +50,7 @@ defineProps<{
   display: flex;
   gap: var(--space-3);
   align-items: flex-start;
+  margin-top: var(--space-6);
 }
 
 .customer-terms label {
