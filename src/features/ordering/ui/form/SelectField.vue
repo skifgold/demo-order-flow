@@ -14,7 +14,7 @@ const props = withDefaults(
     placeholder?: string
     disabled?: boolean
     compact?: boolean
-    summary?: boolean
+    large?: boolean
     error?: string
     hint?: string
   }>(),
@@ -22,7 +22,7 @@ const props = withDefaults(
     placeholder: undefined,
     disabled: false,
     compact: false,
-    summary: false,
+    large: false,
     error: undefined,
     hint: undefined,
   },
@@ -36,14 +36,10 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
 </script>
 
 <template>
-  <FormField
-    :name="name"
-    :initial-value="modelValue"
-    :class="{ 'configuration-select--compact': compact }"
-  >
+  <FormField :name="name" :initial-value="modelValue" :class="{ 'select-field--compact': compact }">
     <label
       v-if="!compact"
-      class="configuration-select__label typography typography--caption"
+      class="select-field__label typography typography--caption"
       :for="inputId"
       >{{ label }}</label
     >
@@ -61,10 +57,10 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
         'typography',
         'typography--body',
         {
-          'typography--body-large': summary,
-          'typography--compact': summary,
-          'configuration-select__control--compact': compact,
-          'configuration-select__control--summary': summary,
+          'typography--body-large': large,
+          'typography--compact': large,
+          'select-field__control--compact': compact,
+          'select-field__control--large': large,
         },
       ]"
       :aria-label="compact ? label : undefined"
@@ -72,30 +68,30 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
       @update:model-value="$emit('update:modelValue', $event)"
     >
       <template #value="slotProps">
-        <span class="configuration-select__value">
+        <span class="select-field__value">
           <img
             v-if="optionFor(slotProps.value)?.imagePath"
             :src="optionFor(slotProps.value)?.imagePath"
             alt=""
           />
-          <span :class="{ 'configuration-select__placeholder': !optionFor(slotProps.value) }">
+          <span :class="{ 'select-field__placeholder': !optionFor(slotProps.value) }">
             {{ optionFor(slotProps.value)?.label ?? slotProps.placeholder }}
           </span>
         </span>
       </template>
       <template #option="slotProps">
-        <span class="configuration-select__option">
+        <span class="select-field__option">
           <img v-if="slotProps.option.imagePath" :src="slotProps.option.imagePath" alt="" />
           <span>{{ slotProps.option.label }}</span>
         </span>
       </template>
     </Select>
-    <p v-if="hint" class="configuration-select__hint typography typography--meta">{{ hint }}</p>
+    <p v-if="hint" class="select-field__hint typography typography--meta">{{ hint }}</p>
     <p
       v-if="!compact || error"
       :id="`${inputId}-error`"
-      class="configuration-select__error typography typography--caption"
-      :class="{ 'configuration-select__error--empty': !error }"
+      class="select-field__error typography typography--caption"
+      :class="{ 'select-field__error--empty': !error }"
     >
       {{ error }}
     </p>
@@ -109,29 +105,29 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
   min-width: 0;
 }
 
-.configuration-select__hint,
-.configuration-select__error {
+.select-field__hint,
+.select-field__error {
   margin: 0;
 }
 
-.configuration-select__error {
+.select-field__error {
   min-block-size: 1.25em;
   color: var(--color-error-border);
 }
 
-.configuration-select__error--empty {
+.select-field__error--empty {
   visibility: hidden;
 }
 
-.configuration-select__value,
-.configuration-select__option {
+.select-field__value,
+.select-field__option {
   display: inline-flex;
   gap: var(--space-2);
   align-items: center;
 }
 
-.configuration-select__value img,
-.configuration-select__option img {
+.select-field__value img,
+.select-field__option img {
   width: 32px;
   height: 22px;
   object-fit: cover;
@@ -139,7 +135,7 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
   border-radius: 2px;
 }
 
-.configuration-select__placeholder {
+.select-field__placeholder {
   color: var(--color-muted);
 }
 
@@ -191,43 +187,43 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
   border: 1px solid var(--color-border);
 }
 
-:deep(.p-formfield.configuration-select--compact) {
+:deep(.p-formfield.select-field--compact) {
   display: block;
 }
 
-:deep(.p-select.configuration-select__control--compact) {
+:deep(.p-select.select-field__control--compact) {
   min-height: auto;
   background: transparent;
   border: 0;
 }
 
-:deep(.p-select.configuration-select__control--compact .p-select-label) {
+:deep(.p-select.select-field__control--compact .p-select-label) {
   padding: 0;
   text-align: right;
   justify-content: flex-end;
 }
 
-:deep(.p-select.configuration-select__control--compact .p-select-dropdown) {
+:deep(.p-select.select-field__control--compact .p-select-dropdown) {
   width: 1.5rem;
 }
 
-:deep(.p-select.configuration-select__control--compact:not(.p-disabled):hover) {
+:deep(.p-select.select-field__control--compact:not(.p-disabled):hover) {
   border: 0;
   box-shadow: none;
 }
 
-:deep(.p-select.configuration-select__control--compact:not(.p-disabled).p-focus) {
+:deep(.p-select.select-field__control--compact:not(.p-disabled).p-focus) {
   border: 0;
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
   box-shadow: none;
 }
 
-:deep(.p-select.configuration-select__control--summary .p-select-label) {
+:deep(.p-select.select-field__control--large .p-select-label) {
   font: inherit;
 }
 
-:deep(.p-select.configuration-select__control--summary .p-select-dropdown) {
+:deep(.p-select.select-field__control--large .p-select-dropdown) {
   color: var(--color-ink);
 }
 

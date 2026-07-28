@@ -88,5 +88,43 @@ describe('Order Draft store', () => {
       shipping: 'standard',
       giftOptions: { message: '', hidePricesOnPackingSlip: false },
     })
+    expect(draft.customerDetails).toEqual({
+      fullName: '',
+      email: '',
+      phone: '',
+      addressLine1: '',
+      city: '',
+      postcode: '',
+      termsAccepted: false,
+    })
+  })
+
+  it('preserves customer details but clears terms when the Basket materially changes', () => {
+    const draft = useOrderDraftStore()
+    const [firstProduct, secondProduct] = catalogueProducts
+
+    draft.setCustomerDetails({
+      fullName: 'Maya Chen',
+      email: 'maya@example.com',
+      phone: '',
+      addressLine1: '1 Market Street',
+      city: 'London',
+      postcode: 'E1 6AN',
+      termsAccepted: true,
+    })
+    draft.reconcileWithBasket({
+      products: [firstProduct!, secondProduct!],
+      basketLines: [
+        { productId: firstProduct!.id, quantity: 1 },
+        { productId: secondProduct!.id, quantity: 1 },
+      ],
+    })
+
+    expect(draft.customerDetails).toMatchObject({
+      fullName: 'Maya Chen',
+      email: 'maya@example.com',
+      addressLine1: '1 Market Street',
+      termsAccepted: false,
+    })
   })
 })

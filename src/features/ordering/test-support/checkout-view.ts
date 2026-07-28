@@ -7,6 +7,7 @@ import { expect, vi } from 'vitest'
 
 import App from '@/app/App.vue'
 import { useBasketStore } from '@/features/basket'
+import { useOrderDraftStore } from '@/features/ordering/draft/order-draft.store'
 import { createAppRouter } from '@/app/router'
 
 import PresentationChoice from '../ui/configuration/PresentationChoice.vue'
@@ -14,6 +15,8 @@ import SelectField from '../ui/form/SelectField.vue'
 import CheckoutView from '../views/CheckoutView.vue'
 
 type CheckoutMount = {
+  basket: ReturnType<typeof useBasketStore>
+  draft: ReturnType<typeof useOrderDraftStore>
   wrapper: VueWrapper
   router: ReturnType<typeof createAppRouter>
 }
@@ -24,6 +27,7 @@ export async function mountCheckout({
   const pinia = createPinia()
   const router = createAppRouter(createMemoryHistory())
   const basket = useBasketStore(pinia)
+  const draft = useOrderDraftStore(pinia)
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
   basket.add('modern-geometry-07', 8)
@@ -42,7 +46,7 @@ export async function mountCheckout({
     },
   })
 
-  return { wrapper, router }
+  return { basket, draft, wrapper, router }
 }
 
 export async function waitForConfiguration(wrapper: VueWrapper): Promise<void> {

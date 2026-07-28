@@ -8,7 +8,7 @@ defineEmits<{ retry: [] }>()
   <section class="checkout-state" role="alert" aria-labelledby="checkout-error-title">
     <h1
       id="checkout-error-title"
-      class="checkout-state__title typography typography--checkout-state-title"
+      class="checkout-state__title typography typography--title typography--title-x-large"
     >
       We could not prepare checkout
     </h1>

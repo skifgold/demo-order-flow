@@ -12,18 +12,15 @@ import type {
   ShippingMethod,
 } from '../../domain/order-configuration'
 import CheckoutProgress from '../checkout/CheckoutProgress.vue'
+import type { CheckoutLine } from '../checkout/checkout-line'
 import ConfigurationErrorSummary from './ConfigurationErrorSummary.vue'
-import {
-  type ConfiguredBasketLine,
-  configurationFieldId,
-  useConfigurationForm,
-} from './configuration-form'
+import { configurationFieldId, useConfigurationForm } from './configuration-form'
 import OrderSummaryPanel from '../order-summary/OrderSummary.vue'
 import PrintConfigurationCard from './PrintConfigurationCard.vue'
 import { useFormIssueFocus } from '../form/use-form-issues'
 
 const props = defineProps<{
-  lines: readonly ConfiguredBasketLine[]
+  lines: readonly CheckoutLine[]
   configuration: OrderConfiguration
   summary: OrderSummary
   issues: readonly ConfigurationIssue[]
@@ -53,7 +50,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
     <header class="configuration-step__header">
       <h1
         id="checkout-title"
-        class="configuration-step__title typography typography--checkout-title"
+        class="configuration-step__title typography typography--title typography--title-2x-large"
       >
         Configure your prints
       </h1>
@@ -94,7 +91,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
               @click="$emit('reviewBasket')"
             />
             <Button
-              class="configuration-step__continue typography typography--action-large"
+              class="configuration-step__continue typography typography--body-x-large"
               data-testid="continue-to-details"
               label="Continue to details"
               type="submit"
@@ -148,11 +145,11 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
   justify-content: space-between;
 }
 
-.configuration-step__review:deep(.p-button) {
+:deep(.p-button.configuration-step__review) {
   padding: 0;
 }
 
-.configuration-step__continue:deep(.p-button) {
+:deep(.p-button.configuration-step__continue) {
   min-width: 342px;
   min-height: 72px;
   color: var(--color-surface);
@@ -161,7 +158,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
   border-radius: 6px;
 }
 
-.configuration-step__continue:deep(.p-button:hover) {
+:deep(.p-button.configuration-step__continue:hover) {
   color: var(--color-surface);
   background: var(--color-accent);
   border-color: var(--color-accent);
@@ -179,7 +176,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
     align-items: stretch;
   }
 
-  .configuration-step__continue:deep(.p-button) {
+  :deep(.p-button.configuration-step__continue) {
     width: 100%;
     min-width: 0;
   }

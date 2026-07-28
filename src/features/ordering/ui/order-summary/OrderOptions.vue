@@ -76,7 +76,7 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
             :options="shippingOptions"
             :error="issueMessageFor(issues, 'shipping')"
             compact
-            summary
+            large
             @update:model-value="$emit('updateShipping', $event as ShippingMethod)"
           />
         </div>

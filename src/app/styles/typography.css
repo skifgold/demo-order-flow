@@ -18,12 +18,31 @@
   line-height: 0.95;
 }
 
-.typography--heading {
+.typography--title {
   font-family: var(--font-display);
-  font-size: var(--font-size-card-heading);
   font-weight: 500;
   letter-spacing: var(--letter-spacing-heading);
   line-height: 1;
+}
+
+.typography--title-small {
+  font-size: var(--font-size-title-small);
+}
+
+.typography--title-medium {
+  font-size: var(--font-size-title-medium);
+}
+
+.typography--title-large {
+  font-size: var(--font-size-title-large);
+}
+
+.typography--title-x-large {
+  font-size: var(--font-size-title-x-large);
+}
+
+.typography--title-2x-large {
+  font-size: clamp(var(--font-size-title-2x-large-min), 5vw, var(--font-size-title-2x-large-max));
 }
 
 .typography--body {
@@ -37,6 +56,10 @@
 .typography--body-large {
   font-size: 18px;
   font-weight: 400;
+}
+
+.typography--body-x-large {
+  font-size: 20px;
 }
 
 .typography--compact {
@@ -54,55 +77,6 @@
 .typography--meta {
   color: var(--color-muted);
   font-size: var(--font-size-meta);
-}
-
-.typography--checkout-title {
-  font-family: var(--font-display);
-  font-size: clamp(48px, 5vw, var(--font-size-checkout-heading-max));
-  font-weight: 500;
-  letter-spacing: var(--letter-spacing-heading);
-  line-height: 1;
-}
-
-.typography--checkout-state-title {
-  font-family: var(--font-display);
-  font-size: var(--font-size-checkout-state-heading);
-}
-
-.typography--summary {
-  font-family: var(--font-display);
-  letter-spacing: var(--letter-spacing-heading);
-}
-
-.typography--summary-title {
-  font-size: 38px;
-  font-weight: 500;
-}
-
-.typography--summary-total {
-  font-size: 36px;
-}
-
-.typography--summary-total-value {
-  font-size: 42px;
-}
-
-.typography--progress-step {
-  color: var(--color-muted);
-  font-size: 16px;
-}
-
-.typography--progress-step-active {
-  color: var(--color-ink);
-  font-weight: 700;
-}
-
-.typography--progress-number {
-  font-size: var(--font-size-meta);
-}
-
-.typography--action-large {
-  font-size: 20px;
 }
 
 .typography.typography--link {

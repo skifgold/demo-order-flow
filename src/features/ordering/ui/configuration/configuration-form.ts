@@ -2,15 +2,9 @@ import { computed, type Ref } from 'vue'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 
-import type { Product } from '@/features/catalogue/api/product.contract'
-
 import type { OrderConfiguration, PrintConfiguration } from '../../domain/order-configuration'
+import type { CheckoutLine } from '../checkout/checkout-line'
 import { createFormFieldIds } from '../form/use-form-issues'
-
-export type ConfiguredBasketLine = {
-  product: Product
-  quantity: number
-}
 
 export function configurationFieldName(productId: string, field: keyof PrintConfiguration): string {
   return `line-${productId}-${field}`
@@ -33,7 +27,7 @@ export function configurationLineFieldId(
 }
 
 export function useConfigurationForm(
-  lines: Ref<readonly ConfiguredBasketLine[]>,
+  lines: Ref<readonly CheckoutLine[]>,
   configuration: Ref<OrderConfiguration>,
 ) {
   const resolver = computed(() => {

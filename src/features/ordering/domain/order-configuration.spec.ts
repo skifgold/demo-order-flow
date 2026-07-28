@@ -201,7 +201,7 @@ describe('order configuration', () => {
     })
   })
 
-  it('creates a payload from a valid Basket and configuration snapshot', () => {
+  it('creates an independent payload snapshot from a valid Basket and configuration', () => {
     const product = catalogueProducts[0]!
     const basketLines = [{ productId: product.id, quantity: 1 }]
     const configuration = {
@@ -215,12 +215,32 @@ describe('order configuration', () => {
       shipping: 'standard' as const,
       giftOptions: { message: 'For Maya', hidePricesOnPackingSlip: true },
     }
-    const payload = createOrderPayload({ products: [product], basketLines, configuration })
+    const customerDetails = {
+      fullName: 'Maya Chen',
+      email: 'maya@example.com',
+      phone: '',
+      addressLine1: '1 Market Street',
+      city: 'London',
+      postcode: 'E1 6AN',
+      termsAccepted: true,
+    }
+    const payload = createOrderPayload({
+      products: [product],
+      basketLines,
+      configuration,
+      customerDetails,
+    })
 
     expect(payload).toMatchObject({
       lines: [{ productId: product.id, quantity: 1, unitPrice: 3500 }],
       shipping: 'standard',
+      customer: { fullName: 'Maya Chen', email: 'maya@example.com' },
       totals: { subtotal: 3500, shippingCost: 695, total: 4195 },
     })
+    customerDetails.fullName = 'Changed after snapshot'
+    configuration.giftOptions.message = 'Changed after snapshot'
+
+    expect(payload.customer.fullName).toBe('Maya Chen')
+    expect(payload.giftOptions.message).toBe('For Maya')
   })
 })

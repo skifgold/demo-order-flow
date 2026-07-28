@@ -31,11 +31,14 @@
   --font-size-overline: 12px;
   --font-size-body: 15px;
   --font-size-meta: 14px;
-  --font-size-card-heading: 28px;
+  --font-size-title-small: 28px;
+  --font-size-title-medium: 36px;
+  --font-size-title-large: 38px;
+  --font-size-title-x-large: 42px;
+  --font-size-title-2x-large-min: 48px;
+  --font-size-title-2x-large-max: 68px;
   --font-size-display-min: 36px;
   --font-size-display-max: 72px;
-  --font-size-checkout-heading-max: 68px;
-  --font-size-checkout-state-heading: 42px;
   --letter-spacing-overline: 0.1em;
   --letter-spacing-display: -0.04em;
   --letter-spacing-heading: -0.03em;

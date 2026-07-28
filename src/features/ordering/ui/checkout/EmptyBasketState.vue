@@ -8,7 +8,7 @@ defineEmits<{ browse: [] }>()
   <section class="checkout-state" aria-labelledby="empty-basket-title">
     <h1
       id="empty-basket-title"
-      class="checkout-state__title typography typography--checkout-state-title"
+      class="checkout-state__title typography typography--title typography--title-x-large"
     >
       Your Basket is empty
     </h1>

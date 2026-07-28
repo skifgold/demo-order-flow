@@ -1,9 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import type { Router } from 'vue-router'
 
-import { useBasketStore } from '@/features/basket'
-import { useProductsQuery } from '@/features/catalogue'
-
 import {
   calculateOrderSummary,
   type ConfigurationIssue,
@@ -12,7 +9,8 @@ import {
   type ShippingMethod,
 } from '../domain/order-configuration'
 import { useOrderDraftStore } from '../draft/order-draft.store'
-import type { ConfiguredBasketLine } from '../ui/configuration/configuration-form'
+
+import { useCheckoutBasket } from './use-basket'
 
 export type UpdateConfigurationLine = {
   productId: string
@@ -21,16 +19,8 @@ export type UpdateConfigurationLine = {
 }
 
 export function useCheckoutConfiguration(router: Router) {
-  const basket = useBasketStore()
+  const { basket, products, lines, isError, isPending, refetch } = useCheckoutBasket()
   const draft = useOrderDraftStore()
-  const { data: productData, isError, isPending, refetch } = useProductsQuery()
-  const products = computed(() => productData.value ?? [])
-  const lines = computed<readonly ConfiguredBasketLine[]>(() =>
-    basket.lines.flatMap((basketLine) => {
-      const product = products.value.find((candidate) => candidate.id === basketLine.productId)
-      return product === undefined ? [] : [{ product, quantity: basketLine.quantity }]
-    }),
-  )
   const summary = computed(() =>
     calculateOrderSummary({
       products: products.value,
@@ -111,6 +101,7 @@ export function useCheckoutConfiguration(router: Router) {
     isPending,
     issues,
     lines,
+    products,
     refetch,
     removeLine,
     reviewBasket,

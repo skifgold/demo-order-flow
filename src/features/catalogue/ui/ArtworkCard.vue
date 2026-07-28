@@ -16,9 +16,7 @@ const basket = useBasketStore()
 const quantity = computed(() => basket.quantityFor(props.product.id))
 const isUnavailable = computed(() => props.product.availableQuantity === 0)
 const isSelected = computed(() => quantity.value > 0)
-const hasReachedAvailability = computed(
-  () => quantity.value >= props.product.availableQuantity,
-)
+const hasReachedAvailability = computed(() => quantity.value >= props.product.availableQuantity)
 
 function addToBasket(): void {
   basket.add(props.product.id, props.product.availableQuantity)
@@ -44,13 +42,19 @@ function increaseQuantity(): void {
 <template>
   <article class="artwork-card" :class="{ 'artwork-card--selected': isSelected }">
     <div class="artwork-card__image-frame">
-      <img class="artwork-card__image" :src="product.imagePath" :alt="`Artwork: ${product.name}`" width="1122"
-        height="1402" loading="lazy" />
+      <img
+        class="artwork-card__image"
+        :src="product.imagePath"
+        :alt="`Artwork: ${product.name}`"
+        width="1122"
+        height="1402"
+        loading="lazy"
+      />
     </div>
     <p class="artwork-card__category typography typography--overline">
       {{ product.category }}
     </p>
-    <h2 class="artwork-card__title typography typography--heading">
+    <h2 class="artwork-card__title typography typography--title typography--title-small">
       {{ product.name }}
     </h2>
     <p class="artwork-card__price typography typography--body">
@@ -67,14 +71,33 @@ function increaseQuantity(): void {
       <template v-else>Not yet selected</template>
     </p>
     <div class="artwork-card__actions">
-      <Button v-if="!isSelected" label="Add to basket" :disabled="isUnavailable"
-        :aria-label="`Add ${product.name} to basket`" @click="addToBasket" />
-      <div v-else class="artwork-card__quantity" role="group" :aria-label="`Quantity for ${product.name}`">
-        <Button label="−" severity="secondary" :aria-label="`Decrease quantity of ${product.name}`"
-          @click="decreaseQuantity" />
+      <Button
+        v-if="!isSelected"
+        label="Add to basket"
+        :disabled="isUnavailable"
+        :aria-label="`Add ${product.name} to basket`"
+        @click="addToBasket"
+      />
+      <div
+        v-else
+        class="artwork-card__quantity"
+        role="group"
+        :aria-label="`Quantity for ${product.name}`"
+      >
+        <Button
+          label="−"
+          severity="secondary"
+          :aria-label="`Decrease quantity of ${product.name}`"
+          @click="decreaseQuantity"
+        />
         <output :aria-label="`${product.name} quantity`">{{ quantity }}</output>
-        <Button label="+" severity="secondary" :disabled="hasReachedAvailability"
-          :aria-label="`Increase quantity of ${product.name}`" @click="increaseQuantity" />
+        <Button
+          label="+"
+          severity="secondary"
+          :disabled="hasReachedAvailability"
+          :aria-label="`Increase quantity of ${product.name}`"
+          @click="increaseQuantity"
+        />
       </div>
     </div>
   </article>
@@ -89,7 +112,9 @@ function increaseQuantity(): void {
   padding: var(--space-6);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .artwork-card--selected {

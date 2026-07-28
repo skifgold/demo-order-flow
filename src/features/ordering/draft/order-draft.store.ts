@@ -5,11 +5,13 @@ import type { BasketLine } from '@/features/basket'
 import type { Product } from '@/features/catalogue/api/product.contract'
 
 import {
+  createEmptyCustomerDetails,
   createEmptyOrderConfiguration,
   normalizePrintConfiguration,
   reconcileOrderConfiguration,
   validateOrderConfiguration,
   type ConfigurationIssue,
+  type CustomerDetails,
   type GiftOptions,
   type OrderConfiguration,
   type PrintConfiguration,
@@ -31,6 +33,7 @@ function cloneOrderConfiguration(configuration: OrderConfiguration): OrderConfig
 export const useOrderDraftStore = defineStore('order-draft', () => {
   const step = ref<CheckoutStep>('configuration')
   const configuration = ref<OrderConfiguration>(createEmptyOrderConfiguration())
+  const customerDetails = ref<CustomerDetails>(createEmptyCustomerDetails())
 
   function setLineConfiguration({
     product,
@@ -62,11 +65,19 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     products: readonly Product[]
     basketLines: readonly BasketLine[]
   }): void {
-    configuration.value = reconcileOrderConfiguration({
+    const reconciledConfiguration = reconcileOrderConfiguration({
       products,
       basketLines,
       configuration: configuration.value,
     })
+    const hasMaterialConfigurationChange =
+      JSON.stringify(configuration.value) !== JSON.stringify(reconciledConfiguration)
+
+    configuration.value = reconciledConfiguration
+
+    if (hasMaterialConfigurationChange) {
+      customerDetails.value.termsAccepted = false
+    }
 
     if (basketLines.length === 0) {
       cancelDraft()
@@ -115,9 +126,14 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     step.value = 'configuration'
   }
 
+  function setCustomerDetails(nextCustomerDetails: CustomerDetails): void {
+    customerDetails.value = { ...nextCustomerDetails }
+  }
+
   function cancelDraft(): void {
     step.value = 'configuration'
     configuration.value = createEmptyOrderConfiguration()
+    customerDetails.value = createEmptyCustomerDetails()
   }
 
   function completeDraft(): void {
@@ -127,6 +143,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
   return {
     step,
     configuration,
+    customerDetails,
     setLineConfiguration,
     setShipping,
     setGiftOptions,
@@ -134,6 +151,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     checkpointConfiguration,
     advanceToCustomerDetails,
     returnToConfiguration,
+    setCustomerDetails,
     cancelDraft,
     completeDraft,
     cloneOrderConfiguration: () => cloneOrderConfiguration(configuration.value),

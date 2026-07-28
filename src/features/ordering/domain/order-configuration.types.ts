@@ -59,6 +59,16 @@ export type OrderSummary = {
   total: number
 }
 
+export type CustomerDetails = {
+  fullName: string
+  email: string
+  phone: string
+  addressLine1: string
+  city: string
+  postcode: string
+  termsAccepted: boolean
+}
+
 export type OrderPayload = Readonly<{
   lines: readonly Readonly<{
     productId: string
@@ -69,6 +79,17 @@ export type OrderPayload = Readonly<{
   }>[]
   shipping: ShippingMethod
   giftOptions: Readonly<GiftOptions>
+  customer: Readonly<{
+    fullName: string
+    email: string
+    phone?: string
+  }>
+  deliveryAddress: Readonly<{
+    addressLine1: string
+    city: string
+    postcode: string
+  }>
+  termsAccepted: true
   totals: Readonly<{
     subtotal: number
     shippingCost: number
