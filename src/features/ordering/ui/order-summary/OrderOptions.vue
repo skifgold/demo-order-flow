@@ -63,7 +63,9 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
 <template>
   <section class="order-options" aria-label="Order options">
     <div class="order-options__shipping">
-      <div class="order-options__row order-options__row--shipping">
+      <div
+        class="order-options__row order-options__row--shipping typography typography--body-large"
+      >
         <span>Shipping</span>
         <div class="order-options__shipping-control">
           <SelectField
@@ -79,20 +81,28 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
           />
         </div>
       </div>
-      <p v-if="!expressEligible" class="order-options__shipping-hint">
+      <p
+        v-if="!expressEligible"
+        class="order-options__shipping-hint typography typography--meta typography--relaxed"
+      >
         Express is available for Print only in A4 or A3.
       </p>
     </div>
     <Accordion v-model:value="activeOption" class="order-options__gift" lazy>
       <AccordionPanel value="gift-options">
-        <AccordionHeader data-testid="toggle-gift-options">
+        <AccordionHeader
+          class="typography typography--body-large"
+          data-testid="toggle-gift-options"
+        >
           <span>Gift options</span>
-          <span class="order-options__gift-summary">{{ giftOptionsSummary }}</span>
+          <span class="order-options__gift-summary typography typography--meta">{{
+            giftOptionsSummary
+          }}</span>
         </AccordionHeader>
         <AccordionContent>
           <div data-testid="gift-options-fields" class="order-options__gift-fields">
             <label
-              class="order-options__gift-label"
+              class="order-options__gift-label typography typography--caption"
               :for="configurationFieldId('giftOptions.message')"
             >
               Gift message <span>(optional)</span>
@@ -106,12 +116,12 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
               fluid
               @update:model-value="updateGiftMessage"
             />
-            <p class="order-options__hint">
+            <p class="order-options__hint typography typography--meta">
               {{ configuration.giftOptions.message.length }}/200 characters
             </p>
             <p
               :id="configurationFieldErrorId('giftOptions.message')"
-              class="order-options__error"
+              class="order-options__error typography typography--caption"
               :class="{ 'order-options__error--empty': !giftMessageError }"
             >
               {{ giftMessageError }}
@@ -123,7 +133,10 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
                 binary
                 @update:model-value="updateHidePrices"
               />
-              <label :for="configurationFieldId('giftOptions.hidePricesOnPackingSlip')">
+              <label
+                class="typography typography--caption"
+                :for="configurationFieldId('giftOptions.hidePricesOnPackingSlip')"
+              >
                 Hide prices on packing slip
               </label>
             </div>
@@ -150,9 +163,6 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
   width: 100%;
   min-height: 72px;
   padding: 0;
-  color: var(--color-ink);
-  font-size: 18px;
-  font-weight: 400;
   text-align: left;
 }
 
@@ -179,9 +189,6 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
 
 .order-options__shipping-hint {
   margin: 0;
-  color: var(--color-muted);
-  font-size: var(--font-size-meta);
-  line-height: 1.35;
 }
 
 .order-options__gift {
@@ -215,7 +222,6 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
 
 .order-options__gift-summary {
   margin-left: auto;
-  color: var(--color-muted);
 }
 
 .order-options :deep(.p-accordionheader-toggle-icon) {
@@ -244,19 +250,13 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
   padding: var(--space-6) 0;
 }
 
-.order-options__gift-label {
-  font-size: var(--font-size-meta);
-}
-
-.order-options__gift span,
-.order-options__hint {
+.order-options__gift span {
   color: var(--color-muted);
 }
 
 .order-options__hint,
 .order-options__error {
   margin: 0;
-  font-size: var(--font-size-meta);
 }
 
 .order-options__error {
@@ -273,10 +273,6 @@ function updateHidePrices(hidePricesOnPackingSlip: boolean): void {
   gap: var(--space-2);
   align-items: center;
   padding-top: var(--space-2);
-}
-
-.order-options__checkbox label {
-  font-size: var(--font-size-meta);
 }
 
 :deep(.p-textarea) {

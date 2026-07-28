@@ -6,7 +6,12 @@ defineEmits<{ retry: [] }>()
 
 <template>
   <section class="checkout-state" role="alert" aria-labelledby="checkout-error-title">
-    <h1 id="checkout-error-title">We could not prepare checkout</h1>
+    <h1
+      id="checkout-error-title"
+      class="checkout-state__title typography typography--checkout-state-title"
+    >
+      We could not prepare checkout
+    </h1>
     <p>Please retry loading your selected Artworks.</p>
     <Button label="Retry" @click="$emit('retry')" />
   </section>
@@ -20,9 +25,7 @@ defineEmits<{ retry: [] }>()
   border: 1px solid var(--color-border);
 }
 
-.checkout-state h1 {
+.checkout-state__title {
   margin-top: 0;
-  font-family: var(--font-display);
-  font-size: var(--font-size-checkout-state-heading);
 }
 </style>

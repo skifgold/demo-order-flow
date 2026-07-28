@@ -30,7 +30,82 @@
   font-size: var(--font-size-body);
 }
 
+.typography--body-medium {
+  font-size: 16px;
+}
+
+.typography--body-large {
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.typography--compact {
+  line-height: 1.25;
+}
+
+.typography--relaxed {
+  line-height: 1.35;
+}
+
+.typography--caption {
+  font-size: var(--font-size-meta);
+}
+
 .typography--meta {
   color: var(--color-muted);
   font-size: var(--font-size-meta);
+}
+
+.typography--checkout-title {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 5vw, var(--font-size-checkout-heading-max));
+  font-weight: 500;
+  letter-spacing: var(--letter-spacing-heading);
+  line-height: 1;
+}
+
+.typography--checkout-state-title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-checkout-state-heading);
+}
+
+.typography--summary {
+  font-family: var(--font-display);
+  letter-spacing: var(--letter-spacing-heading);
+}
+
+.typography--summary-title {
+  font-size: 38px;
+  font-weight: 500;
+}
+
+.typography--summary-total {
+  font-size: 36px;
+}
+
+.typography--summary-total-value {
+  font-size: 42px;
+}
+
+.typography--progress-step {
+  color: var(--color-muted);
+  font-size: 16px;
+}
+
+.typography--progress-step-active {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.typography--progress-number {
+  font-size: var(--font-size-meta);
+}
+
+.typography--action-large {
+  font-size: 20px;
+}
+
+.typography.typography--link {
+  color: var(--color-ink);
+  text-decoration: underline;
 }

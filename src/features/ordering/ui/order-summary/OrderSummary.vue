@@ -74,16 +74,21 @@ function configurationDetails(productId: string): string[] {
 
 <template>
   <aside class="order-summary" aria-label="Order summary">
-    <h2>Order summary</h2>
+    <h2 class="order-summary__title typography typography--summary typography--summary-title">
+      Order summary
+    </h2>
     <ul class="order-summary__lines">
       <li v-for="line in lines" :key="line.product.id">
         <img :src="line.product.imagePath" alt="" />
         <div>
           <strong>{{ line.product.name }}</strong>
-          <span>Qty: {{ line.quantity }}</span>
-          <span v-for="detail in configurationDetails(line.product.id)" :key="detail">{{
-            detail
-          }}</span>
+          <span class="typography typography--body-medium">Qty: {{ line.quantity }}</span>
+          <span
+            v-for="detail in configurationDetails(line.product.id)"
+            :key="detail"
+            class="typography typography--body-medium"
+            >{{ detail }}</span
+          >
         </div>
         <strong>{{
           summaryLine(line.product.id)?.lineTotal === undefined
@@ -100,7 +105,7 @@ function configurationDetails(productId: string): string[] {
       @update-gift-options="$emit('updateGiftOptions', $event)"
     />
 
-    <dl class="order-summary__details">
+    <dl class="order-summary__details typography typography--body-medium">
       <div>
         <dt>Subtotal</dt>
         <dd>{{ hasIncompleteLine ? '—' : formatGbp(summary.subtotal) }}</dd>
@@ -113,11 +118,13 @@ function configurationDetails(productId: string): string[] {
         </dd>
       </div>
     </dl>
-    <div class="order-summary__total">
+    <div class="order-summary__total typography typography--summary typography--summary-total">
       <span>Total</span>
-      <strong>{{ hasIncompleteLine ? '—' : formatGbp(summary.total) }}</strong>
+      <strong class="typography typography--summary-total-value">{{
+        hasIncompleteLine ? '—' : formatGbp(summary.total)
+      }}</strong>
     </div>
-    <p class="order-summary__incomplete">
+    <p class="order-summary__incomplete typography typography--meta">
       {{
         hasIncompleteLine
           ? 'Complete every print to see the final total.'
@@ -137,17 +144,9 @@ function configurationDetails(productId: string): string[] {
   border-radius: 12px;
 }
 
-.order-summary h2,
-.order-summary__total {
-  font-family: var(--font-display);
-  letter-spacing: var(--letter-spacing-heading);
-}
-
-.order-summary h2 {
+.order-summary__title {
   padding-bottom: 28px;
   margin: 0 0 28px;
-  font-size: 38px;
-  font-weight: 500;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -181,11 +180,8 @@ function configurationDetails(productId: string): string[] {
   display: block;
 }
 
-.order-summary__lines span,
-.order-summary__details,
-.order-summary__incomplete {
+.order-summary__lines span {
   color: var(--color-ink);
-  font-size: 16px;
 }
 
 .order-summary__lines span {
@@ -215,17 +211,10 @@ function configurationDetails(productId: string): string[] {
 .order-summary__total {
   padding-top: 28px;
   margin-top: 0;
-  font-size: 36px;
-}
-
-.order-summary__total strong {
-  font-size: 42px;
 }
 
 .order-summary__incomplete {
   margin: var(--space-2) 0 0;
-  color: var(--color-muted);
-  font-size: var(--font-size-meta);
 }
 
 @media (max-width: 800px) {

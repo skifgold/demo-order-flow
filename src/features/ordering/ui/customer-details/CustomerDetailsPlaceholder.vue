@@ -7,7 +7,12 @@ defineEmits<{ back: [] }>()
 <template>
   <section class="checkout-state" aria-labelledby="customer-details-title">
     <p class="typography typography--overline">Checkout / Step 2 of 2</p>
-    <h1 id="customer-details-title">Your details</h1>
+    <h1
+      id="customer-details-title"
+      class="checkout-state__title typography typography--checkout-state-title"
+    >
+      Your details
+    </h1>
     <p>
       Print configuration is saved in this checkout session. Customer and delivery fields are the
       next checkout slice.
@@ -24,9 +29,7 @@ defineEmits<{ back: [] }>()
   border: 1px solid var(--color-border);
 }
 
-.checkout-state h1 {
+.checkout-state__title {
   margin-top: 0;
-  font-family: var(--font-display);
-  font-size: var(--font-size-checkout-state-heading);
 }
 </style>

@@ -51,7 +51,12 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
 <template>
   <section class="configuration-step" aria-labelledby="checkout-title">
     <header class="configuration-step__header">
-      <h1 id="checkout-title">Configure your prints</h1>
+      <h1
+        id="checkout-title"
+        class="configuration-step__title typography typography--checkout-title"
+      >
+        Configure your prints
+      </h1>
       <CheckoutProgress />
     </header>
 
@@ -80,6 +85,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
 
           <footer class="configuration-step__actions">
             <Button
+              class="configuration-step__review typography typography--link"
               data-testid="review-basket"
               label="Review basket"
               severity="secondary"
@@ -88,7 +94,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
               @click="$emit('reviewBasket')"
             />
             <Button
-              class="configuration-step__continue"
+              class="configuration-step__continue typography typography--action-large"
               data-testid="continue-to-details"
               label="Continue to details"
               type="submit"
@@ -115,13 +121,8 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
   margin-bottom: var(--space-8);
 }
 
-.configuration-step h1 {
+.configuration-step__title {
   margin: 0 0 var(--space-6);
-  font-family: var(--font-display);
-  font-size: clamp(48px, 5vw, var(--font-size-checkout-heading-max));
-  font-weight: 500;
-  letter-spacing: var(--letter-spacing-heading);
-  line-height: 1;
 }
 
 .configuration-step__form {
@@ -147,10 +148,8 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
   justify-content: space-between;
 }
 
-.configuration-step__actions :deep(.p-button-text) {
+.configuration-step__review:deep(.p-button) {
   padding: 0;
-  color: var(--color-ink);
-  text-decoration: underline;
 }
 
 .configuration-step__continue:deep(.p-button) {
@@ -160,7 +159,6 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
   background: var(--color-ink);
   border-color: var(--color-ink);
   border-radius: 6px;
-  font-size: 20px;
 }
 
 .configuration-step__continue:deep(.p-button:hover) {

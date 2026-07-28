@@ -6,7 +6,12 @@ defineEmits<{ browse: [] }>()
 
 <template>
   <section class="checkout-state" aria-labelledby="empty-basket-title">
-    <h1 id="empty-basket-title">Your Basket is empty</h1>
+    <h1
+      id="empty-basket-title"
+      class="checkout-state__title typography typography--checkout-state-title"
+    >
+      Your Basket is empty
+    </h1>
     <p>Select an Artwork before configuring an order.</p>
     <Button label="Browse Artworks" @click="$emit('browse')" />
   </section>
@@ -20,9 +25,7 @@ defineEmits<{ browse: [] }>()
   border: 1px solid var(--color-border);
 }
 
-.checkout-state h1 {
+.checkout-state__title {
   margin-top: 0;
-  font-family: var(--font-display);
-  font-size: var(--font-size-checkout-state-heading);
 }
 </style>

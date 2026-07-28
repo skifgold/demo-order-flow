@@ -41,7 +41,12 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
     :initial-value="modelValue"
     :class="{ 'configuration-select--compact': compact }"
   >
-    <label v-if="!compact" class="configuration-select__label" :for="inputId">{{ label }}</label>
+    <label
+      v-if="!compact"
+      class="configuration-select__label typography typography--caption"
+      :for="inputId"
+      >{{ label }}</label
+    >
     <Select
       :input-id="inputId"
       :model-value="modelValue || null"
@@ -52,10 +57,16 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
       :placeholder="placeholder"
       :disabled="disabled"
       :invalid="Boolean(error)"
-      :class="{
-        'configuration-select__control--compact': compact,
-        'configuration-select__control--summary': summary,
-      }"
+      :class="[
+        'typography',
+        'typography--body',
+        {
+          'typography--body-large': summary,
+          'typography--compact': summary,
+          'configuration-select__control--compact': compact,
+          'configuration-select__control--summary': summary,
+        },
+      ]"
       :aria-label="compact ? label : undefined"
       fluid
       @update:model-value="$emit('update:modelValue', $event)"
@@ -79,11 +90,11 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
         </span>
       </template>
     </Select>
-    <p v-if="hint" class="configuration-select__hint">{{ hint }}</p>
+    <p v-if="hint" class="configuration-select__hint typography typography--meta">{{ hint }}</p>
     <p
       v-if="!compact || error"
       :id="`${inputId}-error`"
-      class="configuration-select__error"
+      class="configuration-select__error typography typography--caption"
       :class="{ 'configuration-select__error--empty': !error }"
     >
       {{ error }}
@@ -98,18 +109,9 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
   min-width: 0;
 }
 
-.configuration-select__label {
-  font-size: var(--font-size-meta);
-}
-
 .configuration-select__hint,
 .configuration-select__error {
   margin: 0;
-  font-size: var(--font-size-meta);
-}
-
-.configuration-select__hint {
-  color: var(--color-muted);
 }
 
 .configuration-select__error {
@@ -155,7 +157,6 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
   align-items: center;
   padding: var(--space-2);
   color: var(--color-ink);
-  font-size: var(--font-size-body);
 }
 
 :deep(.p-select-label.p-placeholder) {
@@ -223,8 +224,7 @@ function optionFor(value: unknown): SelectFieldOption | undefined {
 }
 
 :deep(.p-select.configuration-select__control--summary .p-select-label) {
-  font-size: 18px;
-  line-height: 1.25;
+  font: inherit;
 }
 
 :deep(.p-select.configuration-select__control--summary .p-select-dropdown) {

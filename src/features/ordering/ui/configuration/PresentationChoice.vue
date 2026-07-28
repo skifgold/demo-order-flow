@@ -18,7 +18,11 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 
 <template>
   <FormField :name="name" :initial-value="modelValue">
-    <span :id="`${inputId}-label`" class="presentation-choice__label">{{ label }}</span>
+    <span
+      :id="`${inputId}-label`"
+      class="presentation-choice__label typography typography--caption"
+      >{{ label }}</span
+    >
     <SelectButton
       :id="inputId"
       :model-value="modelValue || null"
@@ -34,7 +38,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
     />
     <p
       :id="`${inputId}-error`"
-      class="presentation-choice__error"
+      class="presentation-choice__error typography typography--caption"
       :class="{ 'presentation-choice__error--empty': !error }"
     >
       {{ error }}
@@ -47,10 +51,6 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   display: grid;
   gap: var(--space-1);
   min-width: 0;
-}
-
-.presentation-choice__label {
-  font-size: var(--font-size-meta);
 }
 
 :deep(.p-selectbutton) {
@@ -95,7 +95,6 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
   min-block-size: 1.25em;
   margin: 0;
   color: var(--color-error-border);
-  font-size: var(--font-size-meta);
 }
 
 .presentation-choice__error--empty {
