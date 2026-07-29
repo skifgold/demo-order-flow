@@ -19,9 +19,7 @@ export function normalizePrintConfiguration({
     ? configuration.presentation
     : undefined
 
-  const size = isSupportedPrintSize(product, configuration.size)
-    ? configuration.size
-    : undefined
+  const size = isSupportedPrintSize(product, configuration.size) ? configuration.size : undefined
 
   const finish = isAllowedConfigurationOption(PAPER_FINISHES, configuration.finish)
     ? configuration.finish
@@ -31,9 +29,7 @@ export function normalizePrintConfiguration({
     return { presentation, size, finish }
   }
 
-  const frame = isAllowedFrameStyle(configuration.frame)
-    ? configuration.frame
-    : undefined
+  const frame = isAllowedFrameStyle(configuration.frame) ? configuration.frame : undefined
 
   const glazing = isSupportedGlazing({ presentation, size }, configuration.glazing)
     ? configuration.glazing

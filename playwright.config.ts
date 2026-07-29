@@ -34,21 +34,28 @@ export default defineConfig({
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
+    baseURL: process.env.CI ? 'http://127.0.0.1:5180' : 'http://127.0.0.1:5176',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
 
-    /* Only on CI systems run the tests headless */
-    headless: !!process.env.CI,
+    /* Keep visual baselines free from browser chrome; opt into manual headed review when needed. */
+    headless: process.env.PLAYWRIGHT_HEADED !== 'true',
   },
 
-  /* Chrome desktop coverage is sufficient for this assessment. */
+  /* Chromium covers both the desktop and mobile customer journeys. */
   projects: [
     {
-      name: 'chromium',
+      name: 'chromium-desktop',
       use: {
         ...devices['Desktop Chrome'],
+      },
+    },
+    {
+      name: 'chromium-mobile',
+      testIgnore: /keyboard\.spec\.ts/,
+      use: {
+        ...devices['Pixel 5'],
       },
     },
   ],
@@ -59,12 +66,11 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     /**
-     * Use the dev server by default for faster feedback loop.
-     * Use the preview server on CI for more realistic testing.
-     * Playwright will re-use the local server if there is already a dev-server running.
+     * MSW runs only in development, so E2E uses Vite's dev server in every environment.
+     * Production build verification remains part of the separate build quality gate.
      */
-    command: process.env.CI ? 'npm run preview' : 'npm run dev',
-    port: process.env.CI ? 4173 : 5173,
+    command: 'npm run dev -- --host 127.0.0.1',
+    port: process.env.CI ? 5180 : 5176,
     reuseExistingServer: !process.env.CI,
   },
 })

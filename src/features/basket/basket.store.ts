@@ -53,11 +53,7 @@ export const useBasketStore = defineStore('basket', () => {
   const hasDiscardedPersistedBasket = ref(false)
   const hasHydrated = ref(false)
 
-  const itemCount = computed(
-    () => lines.value.reduce(
-      (total, line) => total + line.quantity,
-      0)
-  )
+  const itemCount = computed(() => lines.value.reduce((total, line) => total + line.quantity, 0))
   const isEmpty = computed(() => lines.value.length === 0)
 
   function persist(): void {

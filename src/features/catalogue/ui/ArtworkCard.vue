@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import Button from 'primevue/button'
 
 import { useBasketStore } from '@/features/basket'
@@ -17,9 +17,15 @@ const quantity = computed(() => basket.quantityFor(props.product.id))
 const isUnavailable = computed(() => props.product.availableQuantity === 0)
 const isSelected = computed(() => quantity.value > 0)
 const hasReachedAvailability = computed(() => quantity.value >= props.product.availableQuantity)
+const quantityControl = ref<HTMLElement>()
 
 function addToBasket(): void {
   basket.add(props.product.id, props.product.availableQuantity)
+  void nextTick(() => {
+    requestAnimationFrame(() => {
+      quantityControl.value?.querySelector<HTMLButtonElement>('button')?.focus()
+    })
+  })
 }
 
 function decreaseQuantity(): void {
@@ -79,6 +85,7 @@ function increaseQuantity(): void {
         @click="addToBasket"
       />
       <div
+        ref="quantityControl"
         v-else
         class="artwork-card__quantity"
         role="group"

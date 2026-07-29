@@ -76,7 +76,7 @@ watch(
   margin: var(--space-2) 0 0;
 }
 
-.submission-recovery:focus-visible {
+.submission-recovery:focus {
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
 }

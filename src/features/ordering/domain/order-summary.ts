@@ -70,8 +70,8 @@ function calculateUnitPrice(product: Product, configuration: CompletePrintConfig
   const framingPrice =
     configuration.presentation === 'framed'
       ? FRAME_PRICE_BY_SIZE[configuration.size] +
-      (configuration.frame === 'natural-oak' ? NATURAL_OAK_PRICE : 0) +
-      (configuration.glazing === 'acrylic' ? ACRYLIC_PRICE : 0)
+        (configuration.frame === 'natural-oak' ? NATURAL_OAK_PRICE : 0) +
+        (configuration.glazing === 'acrylic' ? ACRYLIC_PRICE : 0)
       : 0
 
   return basePrice + finishPrice + framingPrice
@@ -118,6 +118,6 @@ export function calculateOrderSummary({
     lines,
     subtotal,
     shippingCost,
-    total: subtotal + shippingCost
+    total: subtotal + shippingCost,
   }
 }

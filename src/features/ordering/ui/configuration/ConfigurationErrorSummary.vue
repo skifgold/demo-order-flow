@@ -46,4 +46,9 @@ defineExpose({
 .configuration-error-summary a {
   color: inherit;
 }
+
+.configuration-error-summary:focus {
+  outline: 2px solid var(--color-error-border);
+  outline-offset: 3px;
+}
 </style>
