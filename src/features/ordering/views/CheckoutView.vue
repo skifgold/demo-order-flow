@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-
-import { useCheckoutConfiguration } from '../checkout/use-configuration'
-import { useCheckoutCustomerDetails } from '../checkout/use-customer-details'
+import { useCheckoutJourney } from '../checkout/use-checkout-journey'
 import CheckoutErrorState from '../ui/checkout/CheckoutErrorState.vue'
 import CheckoutLoadingState from '../ui/checkout/CheckoutLoadingState.vue'
 import EmptyBasketState from '../ui/checkout/EmptyBasketState.vue'
@@ -11,89 +7,50 @@ import OrderConfirmation from '../ui/checkout/OrderConfirmation.vue'
 import ConfigurationStep from '../ui/configuration/ConfigurationStep.vue'
 import CustomerDetailsStep from '../ui/customer-details/CustomerDetailsStep.vue'
 
-const router = useRouter()
-const {
-  basket,
-  browseArtworks,
-  continueToCustomerDetails,
-  draft,
-  isError,
-  isPending,
-  issues,
-  lines,
-  removeLine,
-  recoverOrderConflict,
-  refetch,
-  reviewBasket,
-  reviewBasketAfterConflict,
-  summary,
-  updateGiftOptions,
-  updateLine,
-  updateShipping,
-  products,
-} = useCheckoutConfiguration(router)
-
-const {
-  confirmation,
-  continueShopping,
-  isSubmitting,
-  isSubmissionBlocked,
-  recovery,
-  returnToConfiguration,
-  serverIssues,
-  setCustomerDetails,
-  submitOrder,
-} = useCheckoutCustomerDetails({
-  router,
-  basket,
-  products,
-  configuration: computed(() => draft.configuration),
-  draft,
-  onConflict: recoverOrderConflict,
-})
+const { screen } = useCheckoutJourney()
 </script>
 
 <template>
   <OrderConfirmation
-    v-if="confirmation !== undefined"
-    :order="confirmation"
-    @continue-shopping="continueShopping"
+    v-if="screen.kind === 'confirmation'"
+    :order="screen.order"
+    @continue-shopping="screen.continueShopping"
   />
 
-  <CheckoutLoadingState v-else-if="isPending" />
+  <CheckoutLoadingState v-else-if="screen.kind === 'loading'" />
 
-  <CheckoutErrorState v-else-if="isError" @retry="refetch" />
+  <CheckoutErrorState v-else-if="screen.kind === 'error'" @retry="screen.retry" />
 
-  <EmptyBasketState v-else-if="basket.isEmpty" @browse="browseArtworks" />
+  <EmptyBasketState v-else-if="screen.kind === 'empty-basket'" @browse="screen.browseArtworks" />
 
   <ConfigurationStep
-    v-else-if="draft.step === 'configuration'"
-    :lines="lines"
-    :configuration="draft.configuration"
-    :summary="summary"
-    :issues="issues"
-    @update-line="updateLine"
-    @update-shipping="updateShipping"
-    @update-gift-options="updateGiftOptions"
-    @continue="continueToCustomerDetails"
-    @review-basket="reviewBasket"
-    @remove-line="removeLine"
+    v-else-if="screen.kind === 'configuration'"
+    :lines="screen.lines"
+    :configuration="screen.configuration"
+    :summary="screen.summary"
+    :issues="screen.issues"
+    @update-line="screen.updateLine"
+    @update-shipping="screen.updateShipping"
+    @update-gift-options="screen.updateGiftOptions"
+    @continue="screen.continueToCustomerDetails"
+    @review-basket="screen.reviewBasket"
+    @remove-line="screen.removeLine"
   />
 
   <CustomerDetailsStep
-    v-else
-    :customer-details="draft.customerDetails"
-    :lines="lines"
-    :configuration="draft.configuration"
-    :summary="summary"
-    :is-submitting="isSubmitting"
-    :is-submission-blocked="isSubmissionBlocked"
-    :server-issues="serverIssues"
-    :recovery="recovery"
-    :highlighted-product-ids="draft.orderConflict?.affectedProductIds"
-    @back="returnToConfiguration"
-    @checkpoint="setCustomerDetails"
-    @review-basket="reviewBasketAfterConflict"
-    @submit="submitOrder"
+    v-else-if="screen.kind === 'customer-details'"
+    :customer-details="screen.customerDetails"
+    :lines="screen.lines"
+    :configuration="screen.configuration"
+    :summary="screen.summary"
+    :is-submitting="screen.isSubmitting"
+    :is-submission-blocked="screen.isSubmissionBlocked"
+    :server-issues="screen.serverIssues"
+    :recovery="screen.recovery"
+    :highlighted-product-ids="screen.highlightedProductIds"
+    @back="screen.returnToConfiguration"
+    @checkpoint="screen.setCustomerDetails"
+    @review-basket="screen.reviewBasketAfterConflict"
+    @submit="screen.submitOrder"
   />
 </template>

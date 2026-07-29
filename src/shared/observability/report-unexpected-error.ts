@@ -6,7 +6,7 @@ export type UnexpectedErrorContext = {
 }
 
 /**
- * Replace this no-op with a Sentry integration when production observability is funded.
+ * Replace this no-op with a Sentry integration for real production.
  * Its context deliberately cannot carry customer data, form values, addresses, or payloads.
  */
 export function reportUnexpectedError(_context: UnexpectedErrorContext): void {
