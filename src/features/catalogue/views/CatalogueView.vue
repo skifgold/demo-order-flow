@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 
 import { BasketSummary, useBasketStore } from '@/features/basket'
 
-import { useProductsQuery } from '../api/use-products-query'
+import { useProductsQuery } from '../queries/use-products-query'
 import ArtworkCard from '../ui/ArtworkCard.vue'
 import CatalogueEmptyState from '../ui/CatalogueEmptyState.vue'
 import CatalogueErrorState from '../ui/CatalogueErrorState.vue'

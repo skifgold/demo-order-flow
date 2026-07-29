@@ -6,8 +6,8 @@ import { ServerError } from '@/shared/errors/server-error'
 import { reportUnexpectedError } from '@/shared/observability/report-unexpected-error'
 import { unexpectedErrorContext } from '@/shared/observability/should-report-error'
 
-import { fetchProducts } from './fetch-products'
-import { productKeys } from './product-keys'
+import { fetchProducts } from '../api/fetch-products'
+import { productKeys } from '../api/product-keys'
 
 export function useProductsQuery() {
   const query = useQuery({
