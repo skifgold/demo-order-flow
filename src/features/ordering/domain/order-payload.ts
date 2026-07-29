@@ -1,5 +1,5 @@
 import type { BasketLine } from '@/features/basket'
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 
 import { CustomerDetailsSchema } from './customer-details'
 import { getCompletePrintConfiguration, calculateOrderSummary } from './order-summary'

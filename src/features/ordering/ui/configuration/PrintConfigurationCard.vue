@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import TrashIcon from '@primevue/icons/trash'
 import Button from 'primevue/button'
 
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 import {
   getSupportedGlazings,
   getSupportedSizes,

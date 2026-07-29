@@ -1,5 +1,5 @@
 import type { BasketLine } from '@/features/basket'
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 
 import { isExpressEligible, normalizePrintConfiguration } from './configuration'
 import { getCompletePrintConfiguration } from './order-summary'

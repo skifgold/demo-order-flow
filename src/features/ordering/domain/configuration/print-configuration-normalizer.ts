@@ -1,4 +1,4 @@
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 
 import { isAllowedConfigurationOption } from './configuration-option'
 import { isAllowedFrameStyle, isSupportedGlazing } from './framing-rules'

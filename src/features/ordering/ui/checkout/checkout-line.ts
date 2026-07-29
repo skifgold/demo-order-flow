@@ -1,4 +1,4 @@
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 
 export type CheckoutLine = {
   product: Product

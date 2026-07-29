@@ -3,7 +3,7 @@ import type { ComputedRef } from 'vue'
 import type { Router } from 'vue-router'
 
 import type { useBasketStore } from '@/features/basket'
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 
 import type { OrderConfiguration, CustomerDetails } from '../domain/order-configuration'
 import { useOrderDraftStore } from '../draft/order-draft.store'

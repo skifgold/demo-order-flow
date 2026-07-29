@@ -1,4 +1,5 @@
 export { fetchProducts } from './api/fetch-products'
 export { productKeys } from './api/product-keys'
 export { useProductsQuery } from './api/use-products-query'
+export type { Product } from './api/product.contract'
 export { default as CatalogueView } from './views/CatalogueView.vue'

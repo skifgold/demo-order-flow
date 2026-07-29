@@ -1,7 +1,7 @@
 import { computed, ref, type ComputedRef } from 'vue'
 
 import type { BasketLine } from '@/features/basket'
-import type { Product } from '@/features/catalogue/api/product.contract'
+import type { Product } from '@/features/catalogue'
 import { isRequestCancellation } from '@/shared/errors/is-request-cancellation'
 import { NetworkError } from '@/shared/errors/network-error'
 import { OrderConflictError } from '@/shared/errors/order-conflict-error'
