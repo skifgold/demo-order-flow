@@ -1,24 +1,62 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Button from 'primevue/button'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
 
 import { scheduleDemoScenario, type DemoScenario } from './demo-scenarios'
 
 const props = defineProps<{ refreshCatalogue: () => void }>()
 
 const isOpen = ref(false)
+const toast = useToast()
 
 function enableScenario(scenario: DemoScenario): void {
   scheduleDemoScenario(scenario)
+  showScenarioFeedback(scenario)
   isOpen.value = false
 
   if (scenario === 'catalogue-delay' || scenario === 'catalogue-failure') {
     props.refreshCatalogue()
   }
 }
+
+function showScenarioFeedback(scenario: DemoScenario): void {
+  if (scenario === 'catalogue-delay') {
+    return
+  }
+
+  const feedback = scenarioFeedback(scenario)
+
+  toast.add({ ...feedback, life: 4000 })
+}
+
+function scenarioFeedback(scenario: Exclude<DemoScenario, 'catalogue-delay'>) {
+  switch (scenario) {
+    case 'catalogue-failure':
+      return {
+        severity: 'warn',
+        summary: 'Catalogue failure triggered',
+        detail: 'The refresh warning will appear after the request fails.',
+      } as const
+    case 'order-conflict':
+      return {
+        severity: 'warn',
+        summary: 'Order Conflict armed',
+        detail: 'Submit an order to trigger it.',
+      } as const
+    case 'order-server-failure':
+      return {
+        severity: 'error',
+        summary: 'Server failure armed',
+        detail: 'Submit an order to trigger it.',
+      } as const
+  }
+}
 </script>
 
 <template>
+  <Toast position="top-right" />
   <aside class="demo-controls" :class="{ 'demo-controls--open': isOpen }" aria-label="Demo controls">
     <Button
       class="demo-controls__toggle"

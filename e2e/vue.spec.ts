@@ -38,7 +38,7 @@ test('recovers from a reviewer-triggered Order Conflict without losing checkout 
   await page.getByRole('checkbox', { name: 'I agree to the terms and' }).check()
   await page.getByTestId('submit-order').click()
 
-  const conflictBanner = page.getByRole('alert')
+  const conflictBanner = page.locator('.submission-recovery')
   await expect(conflictBanner).toContainText('An item in your basket changed')
   await expect(conflictBanner).toBeFocused()
   await expect(page.getByTestId('submit-order')).toBeDisabled()
@@ -60,6 +60,8 @@ test('uses the reviewer catalogue-failure scenario without reloading the page', 
   await page.getByRole('button', { name: 'Reviewer scenarios' }).click()
   await page.getByRole('button', { name: 'Fail catalogue' }).click()
 
+  await expect(page.getByText('Catalogue failure triggered')).toBeVisible()
+
   const refreshWarning = page.getByText('Couldn’t update the catalogue')
   await expect(refreshWarning).toBeVisible()
   await expect(
@@ -76,4 +78,21 @@ test('uses the reviewer catalogue-failure scenario without reloading the page', 
 
   await page.getByRole('button', { name: 'Try again' }).click()
   await expect(refreshWarning).toBeHidden()
+})
+
+test('shows the catalogue refresh indicator during the reviewer delay scenario', async ({
+  page,
+}) => {
+  await page.goto('/?demo=true')
+  await expect(
+    page.getByRole('list', { name: 'Available Artworks' }).getByRole('listitem'),
+  ).toHaveCount(6)
+
+  await page.getByRole('button', { name: 'Reviewer scenarios' }).click()
+  await page.getByRole('button', { name: 'Delay catalogue' }).click()
+
+  const refreshStatus = page.getByText('Refreshing availability…')
+  await expect(refreshStatus).toBeVisible()
+  await expect(page.getByText('Catalogue refresh started')).toHaveCount(0)
+  await expect(refreshStatus).toBeHidden({ timeout: 7000 })
 })

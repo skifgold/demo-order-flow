@@ -4,6 +4,8 @@ import { catalogueProducts } from './catalogue.data'
 import { consumeCatalogueScenario, consumeOrderScenario } from './demo-scenarios'
 import { OrderRequestSchema } from '@/features/ordering/api/post-order.contract'
 
+const DEMO_CATALOGUE_DELAY_MS = 5000
+
 export const handlers = [
   http.get('*/products', async () => {
     const scenario = consumeCatalogueScenario()
@@ -13,7 +15,7 @@ export const handlers = [
     }
 
     if (scenario === 'delay') {
-      await delay(2500)
+      await delay(DEMO_CATALOGUE_DELAY_MS)
     }
 
     await delay(250)
