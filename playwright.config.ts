@@ -69,7 +69,7 @@ export default defineConfig({
      * MSW runs only in development, so E2E uses Vite's dev server in every environment.
      * Production build verification remains part of the separate build quality gate.
      */
-    command: 'npm run dev -- --host 127.0.0.1',
+    command: `npm run dev -- --host 127.0.0.1 --port ${process.env.CI ? 5180 : 5176}`,
     port: process.env.CI ? 5180 : 5176,
     reuseExistingServer: !process.env.CI,
   },
