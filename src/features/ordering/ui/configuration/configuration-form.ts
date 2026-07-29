@@ -1,13 +1,21 @@
-import { computed, type Ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
-import { z } from 'zod'
 
-import type { OrderConfiguration, PrintConfiguration } from '../../domain/order-configuration'
+import {
+  createOrderConfigurationSchema,
+  type ConfigurationIssue,
+  type OrderConfiguration,
+  type PrintConfiguration,
+} from '../../domain/order-configuration'
 import type { CheckoutItem } from '../checkout/checkout-item'
 import { createFormFieldIds } from '../form/use-form-issues'
 
+type ResolverIssue = {
+  message: string
+}
+
 export function configurationFieldName(productId: string, field: keyof PrintConfiguration): string {
-  return `item-${productId}-${field}`
+  return configurationItemField(productId, field)
 }
 
 const configurationFieldIds = createFormFieldIds('configuration')
@@ -30,59 +38,38 @@ export function useConfigurationForm(
   items: Ref<readonly CheckoutItem[]>,
   configuration: Ref<OrderConfiguration>,
 ) {
+  const issues = ref<readonly ConfigurationIssue[]>([])
+
   const resolver = computed(() => {
-    const schemaShape = Object.fromEntries(
-      items.value.flatMap((item) => {
-        const itemConfiguration = configuration.value.items[item.product.id] ?? {}
-        const fields: [string, z.ZodType<string>][] = [
-          [
-            configurationFieldName(item.product.id, 'presentation'),
-            z.string().min(1, 'Choose a presentation.'),
-          ],
-          [configurationFieldName(item.product.id, 'size'), z.string().min(1, 'Choose a size.')],
-          [
-            configurationFieldName(item.product.id, 'finish'),
-            z.string().min(1, 'Choose a paper finish.'),
-          ],
-        ]
+    const schema = createOrderConfigurationSchema({
+      products: items.value.map((item) => item.product),
+      basketItems: items.value.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+    })
+    const resolve = zodResolver(schema)
 
-        if (itemConfiguration.presentation === 'framed') {
-          fields.push(
-            [
-              configurationFieldName(item.product.id, 'frame'),
-              z.string().min(1, 'Choose a frame style.'),
-            ],
-            [
-              configurationFieldName(item.product.id, 'glazing'),
-              z.string().min(1, 'Choose a glazing option.'),
-            ],
-          )
-        }
+    return async (options: Parameters<typeof resolve>[0]) => {
+      const result = await resolve({ ...options, values: configuration.value })
+      const errors = result.errors as Record<string, ResolverIssue[]>
+      issues.value = Object.entries(errors).flatMap(([field, errors]) =>
+        errors.map((error) => ({ field, message: error.message })),
+      )
 
-        return fields
-      }),
-    )
-
-    return zodResolver(z.object(schemaShape))
+      return result
+    }
   })
 
-  const initialValues = computed(() =>
-    Object.fromEntries(
-      items.value.flatMap((item) => {
-        const itemConfiguration = configuration.value.items[item.product.id] ?? {}
-        return [
-          [
-            configurationFieldName(item.product.id, 'presentation'),
-            itemConfiguration.presentation ?? '',
-          ],
-          [configurationFieldName(item.product.id, 'size'), itemConfiguration.size ?? ''],
-          [configurationFieldName(item.product.id, 'finish'), itemConfiguration.finish ?? ''],
-          [configurationFieldName(item.product.id, 'frame'), itemConfiguration.frame ?? ''],
-          [configurationFieldName(item.product.id, 'glazing'), itemConfiguration.glazing ?? ''],
-        ]
-      }),
-    ),
+  const initialValues = computed(() => configuration.value)
+
+  watch(
+    configuration,
+    () => {
+      issues.value = []
+    },
+    { deep: true },
   )
 
-  return { initialValues, resolver }
+  return { initialValues, issues, resolver }
 }

@@ -1,17 +1,8 @@
 import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 
-import { isExpressEligible, normalizePrintConfiguration } from './configuration'
-import { getCompletePrintConfiguration } from './order-summary'
-import type {
-  CompletePrintConfiguration,
-  ConfigurationIssue,
-  OrderConfiguration,
-} from './order-configuration.types'
-
-function getProductById(products: readonly Product[], productId: string): Product | undefined {
-  return products.find((product) => product.id === productId)
-}
+import { createOrderConfigurationSchema } from './order-configuration-schema'
+import type { ConfigurationIssue, OrderConfiguration } from './order-configuration.types'
 
 export function validateOrderConfiguration({
   products,
@@ -22,51 +13,16 @@ export function validateOrderConfiguration({
   basketItems: readonly BasketItem[]
   configuration: OrderConfiguration
 }): { issues: ConfigurationIssue[] } {
-  const issues: ConfigurationIssue[] = []
-  const completeConfigurations: (CompletePrintConfiguration | undefined)[] = []
+  const result = createOrderConfigurationSchema({ products, basketItems }).safeParse(configuration)
 
-  for (const basketItem of basketItems) {
-    const product = getProductById(products, basketItem.productId)
-    const fieldPrefix = `items.${basketItem.productId}`
-
-    if (product === undefined) {
-      issues.push({ field: fieldPrefix, message: 'This Artwork is no longer available.' })
-      continue
-    }
-
-    const normalized = normalizePrintConfiguration({
-      product,
-      configuration: configuration.items[basketItem.productId] ?? {},
-    })
-
-    if (normalized.presentation === undefined) {
-      issues.push({ field: `${fieldPrefix}.presentation`, message: 'Choose a presentation.' })
-    }
-    if (normalized.size === undefined) {
-      issues.push({ field: `${fieldPrefix}.size`, message: 'Choose a size.' })
-    }
-    if (normalized.finish === undefined) {
-      issues.push({ field: `${fieldPrefix}.finish`, message: 'Choose a paper finish.' })
-    }
-    if (normalized.presentation === 'framed' && normalized.frame === undefined) {
-      issues.push({ field: `${fieldPrefix}.frame`, message: 'Choose a frame style.' })
-    }
-    if (normalized.presentation === 'framed' && normalized.glazing === undefined) {
-      issues.push({ field: `${fieldPrefix}.glazing`, message: 'Choose a glazing option.' })
-    }
-
-    completeConfigurations.push(getCompletePrintConfiguration(product, normalized))
+  if (result.success) {
+    return { issues: [] }
   }
 
-  if (configuration.shipping === 'express' && !isExpressEligible(completeConfigurations)) {
-    issues.push({ field: 'shipping', message: 'Express shipping is not available for this order.' })
+  return {
+    issues: result.error.issues.map((issue) => ({
+      field: issue.path.join('.'),
+      message: issue.message,
+    })),
   }
-  if (configuration.giftOptions.message.length > 200) {
-    issues.push({
-      field: 'giftOptions.message',
-      message: 'Gift message must be 200 characters or fewer.',
-    })
-  }
-
-  return { issues }
 }

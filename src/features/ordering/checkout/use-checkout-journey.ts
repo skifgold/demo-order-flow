@@ -97,7 +97,6 @@ export function useCheckoutJourney() {
         items: items.value,
         configuration: draft.configuration,
         summary: configuration.summary.value,
-        issues: configuration.issues.value,
         updateItem: configuration.updateItem,
         updateShipping: configuration.updateShipping,
         updateGiftOptions: configuration.updateGiftOptions,

@@ -5,6 +5,7 @@ import { catalogueProducts } from '@/mocks/catalogue.data'
 
 import {
   calculateOrderSummary,
+  createOrderConfigurationSchema,
   createEmptyOrderConfiguration,
   createOrderPayload,
   isExpressEligible,
@@ -153,6 +154,28 @@ describe('order configuration', () => {
     })
 
     expect(validation.issues).toEqual([
+      { field: `items.${product.id}.presentation`, message: 'Choose a presentation.' },
+      { field: `items.${product.id}.size`, message: 'Choose a size.' },
+      { field: `items.${product.id}.finish`, message: 'Choose a paper finish.' },
+    ])
+  })
+
+  it('exposes the same missing-choice issues from its Zod schema', () => {
+    const product = catalogueProducts[0]!
+    const result = createOrderConfigurationSchema({
+      products: [product],
+      basketItems: [{ productId: product.id, quantity: 1 }],
+    }).safeParse(createEmptyOrderConfiguration())
+
+    expect(result.success).toBe(false)
+
+    if (result.success) {
+      return
+    }
+
+    expect(
+      result.error.issues.map((issue) => ({ field: issue.path.join('.'), message: issue.message })),
+    ).toEqual([
       { field: `items.${product.id}.presentation`, message: 'Choose a presentation.' },
       { field: `items.${product.id}.size`, message: 'Choose a size.' },
       { field: `items.${product.id}.finish`, message: 'Choose a paper finish.' },

@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, toRef } from 'vue'
 import Form from '@primevue/forms/form'
+import type { FormSubmitEvent } from '@primevue/forms/form'
 import Button from 'primevue/button'
 
-import type {
-  ConfigurationIssue,
-  GiftOptions,
-  OrderConfiguration,
-  OrderSummary,
-  PrintConfiguration,
-  ShippingMethod,
-} from '../../domain/order-configuration'
+import type { GiftOptions, OrderConfiguration, OrderSummary, PrintConfiguration, ShippingMethod } from '../../domain/order-configuration'
 import CheckoutProgress from '../checkout/CheckoutProgress.vue'
 import type { CheckoutItem } from '../checkout/checkout-item'
 import ConfigurationErrorSummary from './ConfigurationErrorSummary.vue'
@@ -23,10 +17,9 @@ const props = defineProps<{
   items: readonly CheckoutItem[]
   configuration: OrderConfiguration
   summary: OrderSummary
-  issues: readonly ConfigurationIssue[]
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   updateItem: [input: { productId: string; field: keyof PrintConfiguration; value: string }]
   updateShipping: [shipping: ShippingMethod]
   updateGiftOptions: [giftOptions: GiftOptions]
@@ -37,12 +30,19 @@ defineEmits<{
 
 const items = toRef(props, 'items')
 const configuration = toRef(props, 'configuration')
-const issues = toRef(props, 'issues')
 const errorSummary = ref<{ focus: () => void }>()
 const formKey = computed(() => props.items.map((item) => item.product.id).join('-'))
-const { initialValues, resolver } = useConfigurationForm(items, configuration)
+const { initialValues, issues, resolver } = useConfigurationForm(items, configuration)
 
 useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
+
+function onSubmit(event: FormSubmitEvent): void {
+  if (!event.valid || issues.value.length > 0) {
+    return
+  }
+
+  emit('continue')
+}
 </script>
 
 <template>
@@ -63,7 +63,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
       :initial-values="initialValues"
       :resolver="resolver"
       :validate-on-value-update="false"
-      @submit="$emit('continue')"
+      @submit="onSubmit"
     >
       <div class="configuration-step__layout">
         <div class="configuration-step__content">

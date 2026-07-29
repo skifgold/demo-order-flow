@@ -28,7 +28,6 @@ const { screen } = useCheckoutJourney()
     :items="screen.items"
     :configuration="screen.configuration"
     :summary="screen.summary"
-    :issues="screen.issues"
     @update-item="screen.updateItem"
     @update-shipping="screen.updateShipping"
     @update-gift-options="screen.updateGiftOptions"
