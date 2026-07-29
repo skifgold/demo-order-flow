@@ -61,6 +61,11 @@ defineProps<{
   flex: 0 0 auto;
 }
 
+.p-formfield {
+  display: grid;
+  gap: var(--space-1);
+}
+
 :deep(.p-checkbox-box) {
   width: 22px;
   height: 22px;

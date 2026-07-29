@@ -47,7 +47,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
 </template>
 
 <style scoped>
-:deep(.p-formfield) {
+.p-formfield {
   display: grid;
   gap: var(--space-1);
   min-width: 0;

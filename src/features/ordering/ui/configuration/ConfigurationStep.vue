@@ -164,7 +164,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
   border-color: var(--color-accent);
 }
 
-@media (max-width: 800px) {
+@media (max-width: 960px) {
   .configuration-step__layout {
     grid-template-columns: 1fr;
   }

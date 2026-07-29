@@ -72,7 +72,7 @@ defineProps<{
   color: var(--color-error-border);
 }
 
-:deep(.p-formfield) {
+.p-formfield {
   display: grid;
   gap: var(--space-1);
   min-width: 0;
