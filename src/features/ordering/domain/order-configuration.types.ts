@@ -35,7 +35,7 @@ export type GiftOptions = {
 }
 
 export type OrderConfiguration = {
-  lines: Record<string, PrintConfiguration>
+  items: Record<string, PrintConfiguration>
   shipping: ShippingMethod
   giftOptions: GiftOptions
 }
@@ -45,15 +45,15 @@ export type ConfigurationIssue = {
   message: string
 }
 
-export type OrderSummaryLine = {
+export type OrderSummaryItem = {
   productId: string
   quantity: number
   unitPrice?: number
-  lineTotal?: number
+  itemTotal?: number
 }
 
 export type OrderSummary = {
-  lines: OrderSummaryLine[]
+  items: OrderSummaryItem[]
   subtotal: number
   shippingCost: number
   total: number
@@ -70,12 +70,12 @@ export type CustomerDetails = {
 }
 
 export type OrderPayload = Readonly<{
-  lines: readonly Readonly<{
+  items: readonly Readonly<{
     productId: string
     quantity: number
     configuration: Readonly<CompletePrintConfiguration>
     unitPrice: number
-    lineTotal: number
+    itemTotal: number
   }>[]
   shipping: ShippingMethod
   giftOptions: Readonly<GiftOptions>

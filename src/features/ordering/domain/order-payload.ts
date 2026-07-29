@@ -1,4 +1,4 @@
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 
 import { CustomerDetailsSchema } from './customer-details'
@@ -8,42 +8,42 @@ import type { CustomerDetails, OrderConfiguration, OrderPayload } from './order-
 
 export function createOrderPayload({
   products,
-  basketLines,
+  basketItems,
   configuration,
   customerDetails,
 }: {
   products: readonly Product[]
-  basketLines: readonly BasketLine[]
+  basketItems: readonly BasketItem[]
   configuration: OrderConfiguration
   customerDetails: CustomerDetails
 }): OrderPayload {
-  const validation = validateOrderConfiguration({ products, basketLines, configuration })
+  const validation = validateOrderConfiguration({ products, basketItems, configuration })
   const customerDetailsValidation = CustomerDetailsSchema.safeParse(customerDetails)
 
   if (validation.issues.length > 0 || !customerDetailsValidation.success) {
     throw new Error('Cannot create an order payload from an invalid configuration.')
   }
 
-  const summary = calculateOrderSummary({ products, basketLines, configuration })
-  const lines = basketLines.map((basketLine) => {
-    const product = products.find((candidate) => candidate.id === basketLine.productId)!
+  const summary = calculateOrderSummary({ products, basketItems, configuration })
+  const items = basketItems.map((basketItem) => {
+    const product = products.find((candidate) => candidate.id === basketItem.productId)!
     const completeConfiguration = getCompletePrintConfiguration(
       product,
-      configuration.lines[product.id],
+      configuration.items[product.id],
     )!
-    const summaryLine = summary.lines.find((line) => line.productId === product.id)!
+    const summaryItem = summary.items.find((item) => item.productId === product.id)!
 
     return {
       productId: product.id,
-      quantity: basketLine.quantity,
+      quantity: basketItem.quantity,
       configuration: { ...completeConfiguration },
-      unitPrice: summaryLine.unitPrice!,
-      lineTotal: summaryLine.lineTotal!,
+      unitPrice: summaryItem.unitPrice!,
+      itemTotal: summaryItem.itemTotal!,
     }
   })
 
   return {
-    lines,
+    items,
     shipping: configuration.shipping,
     giftOptions: { ...configuration.giftOptions },
     customer: {

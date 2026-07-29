@@ -78,11 +78,11 @@ export async function selectConfigurationValue(
 export async function choosePrintOnlyA4Matte(wrapper: VueWrapper): Promise<void> {
   await selectConfigurationValue(
     wrapper,
-    'configuration-lines-modern-geometry-07-presentation',
+    'configuration-items-modern-geometry-07-presentation',
     'print-only',
   )
-  await selectConfigurationValue(wrapper, 'configuration-lines-modern-geometry-07-size', 'A4')
-  await selectConfigurationValue(wrapper, 'configuration-lines-modern-geometry-07-finish', 'matte')
+  await selectConfigurationValue(wrapper, 'configuration-items-modern-geometry-07-size', 'A4')
+  await selectConfigurationValue(wrapper, 'configuration-items-modern-geometry-07-finish', 'matte')
 }
 
 export async function expectFocusOn(element: Element): Promise<void> {

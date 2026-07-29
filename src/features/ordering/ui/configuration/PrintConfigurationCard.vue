@@ -19,8 +19,8 @@ import { issueMessageFor } from '../form/use-form-issues'
 import PresentationChoice from './PresentationChoice.vue'
 import {
   configurationFieldName,
-  configurationLineField,
-  configurationLineFieldId,
+  configurationItemField,
+  configurationItemFieldId,
 } from './configuration-form'
 
 const props = defineProps<{
@@ -59,7 +59,7 @@ const glazingOptions = computed<readonly SelectFieldOption[]>(() =>
 )
 
 function issueFor(field: keyof PrintConfiguration): string | undefined {
-  return issueMessageFor(props.issues, configurationLineField(props.product.id, field))
+  return issueMessageFor(props.issues, configurationItemField(props.product.id, field))
 }
 
 function sizeLabel(size: string): string {
@@ -94,7 +94,7 @@ function sizeLabel(size: string): string {
       <div class="print-configuration__fields">
         <PresentationChoice
           :name="configurationFieldName(product.id, 'presentation')"
-          :input-id="configurationLineFieldId(product.id, 'presentation')"
+          :input-id="configurationItemFieldId(product.id, 'presentation')"
           label="Presentation"
           :model-value="configuration.presentation ?? ''"
           :options="presentationOptions"
@@ -103,7 +103,7 @@ function sizeLabel(size: string): string {
         />
         <SelectField
           :name="configurationFieldName(product.id, 'size')"
-          :input-id="configurationLineFieldId(product.id, 'size')"
+          :input-id="configurationItemFieldId(product.id, 'size')"
           label="Size"
           :model-value="configuration.size ?? ''"
           :options="sizeOptions"
@@ -113,7 +113,7 @@ function sizeLabel(size: string): string {
         />
         <SelectField
           :name="configurationFieldName(product.id, 'finish')"
-          :input-id="configurationLineFieldId(product.id, 'finish')"
+          :input-id="configurationItemFieldId(product.id, 'finish')"
           label="Paper finish"
           :model-value="configuration.finish ?? ''"
           :options="finishOptions"
@@ -123,7 +123,7 @@ function sizeLabel(size: string): string {
         />
         <SelectField
           :name="configurationFieldName(product.id, 'frame')"
-          :input-id="configurationLineFieldId(product.id, 'frame')"
+          :input-id="configurationItemFieldId(product.id, 'frame')"
           label="Frame style"
           :model-value="configuration.frame ?? ''"
           :options="frameOptions"
@@ -135,7 +135,7 @@ function sizeLabel(size: string): string {
         <SelectField
           class="print-configuration__glazing"
           :name="configurationFieldName(product.id, 'glazing')"
-          :input-id="configurationLineFieldId(product.id, 'glazing')"
+          :input-id="configurationItemFieldId(product.id, 'glazing')"
           label="Glazing"
           :model-value="configuration.glazing ?? ''"
           :options="glazingOptions"

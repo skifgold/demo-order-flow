@@ -16,14 +16,14 @@ const PrintConfigurationSchema = z.discriminatedUnion('presentation', [
 ])
 
 export const OrderRequestSchema = z.object({
-  lines: z
+  items: z
     .array(
       z.object({
         productId: z.string().min(1),
         quantity: z.number().int().positive(),
         configuration: PrintConfigurationSchema,
         unitPrice: z.number().int().nonnegative(),
-        lineTotal: z.number().int().nonnegative(),
+        itemTotal: z.number().int().nonnegative(),
       }),
     )
     .min(1),

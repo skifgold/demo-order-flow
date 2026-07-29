@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 
 import {
@@ -26,8 +26,8 @@ export type OrderConflict = {
 
 function cloneOrderConfiguration(configuration: OrderConfiguration): OrderConfiguration {
   return {
-    lines: Object.fromEntries(
-      Object.entries(configuration.lines).map(([productId, line]) => [productId, { ...line }]),
+    items: Object.fromEntries(
+      Object.entries(configuration.items).map(([productId, item]) => [productId, { ...item }]),
     ),
     shipping: configuration.shipping,
     giftOptions: { ...configuration.giftOptions },
@@ -40,7 +40,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
   const customerDetails = ref<CustomerDetails>(createEmptyCustomerDetails())
   const orderConflict = ref<OrderConflict>()
 
-  function setLineConfiguration({
+  function setItemConfiguration({
     product,
     productId,
     patch,
@@ -49,9 +49,9 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     productId: string
     patch: Partial<PrintConfiguration>
   }): void {
-    configuration.value.lines[productId] = normalizePrintConfiguration({
+    configuration.value.items[productId] = normalizePrintConfiguration({
       product,
-      configuration: { ...configuration.value.lines[productId], ...patch },
+      configuration: { ...configuration.value.items[productId], ...patch },
     })
   }
 
@@ -65,14 +65,14 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
 
   function reconcileWithBasket({
     products,
-    basketLines,
+    basketItems,
   }: {
     products: readonly Product[]
-    basketLines: readonly BasketLine[]
+    basketItems: readonly BasketItem[]
   }): void {
     const reconciledConfiguration = reconcileOrderConfiguration({
       products,
-      basketLines,
+      basketItems,
       configuration: configuration.value,
     })
     const hasMaterialConfigurationChange =
@@ -85,7 +85,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
       step.value = 'configuration'
     }
 
-    if (basketLines.length === 0) {
+    if (basketItems.length === 0) {
       cancelDraft()
       return
     }
@@ -93,29 +93,29 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
 
   function checkpointConfiguration({
     products,
-    basketLines,
+    basketItems,
   }: {
     products: readonly Product[]
-    basketLines: readonly BasketLine[]
+    basketItems: readonly BasketItem[]
   }): void {
     configuration.value = reconcileOrderConfiguration({
       products,
-      basketLines,
+      basketItems,
       configuration: configuration.value,
     })
   }
 
   function advanceToCustomerDetails({
     products,
-    basketLines,
+    basketItems,
   }: {
     products: readonly Product[]
-    basketLines: readonly BasketLine[]
+    basketItems: readonly BasketItem[]
   }): { issues: ConfigurationIssue[] } {
-    checkpointConfiguration({ products, basketLines })
+    checkpointConfiguration({ products, basketItems })
     const validation = validateOrderConfiguration({
       products,
-      basketLines,
+      basketItems,
       configuration: configuration.value,
     })
 
@@ -158,7 +158,7 @@ export const useOrderDraftStore = defineStore('order-draft', () => {
     configuration,
     customerDetails,
     orderConflict,
-    setLineConfiguration,
+    setItemConfiguration,
     setShipping,
     setGiftOptions,
     reconcileWithBasket,

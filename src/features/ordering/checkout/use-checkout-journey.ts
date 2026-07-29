@@ -10,7 +10,7 @@ import { useCheckoutSubmission } from './use-submission'
 
 export function useCheckoutJourney() {
   const router = useRouter()
-  const { basket, products, lines, isError, isPending, refetch } = useCheckoutBasket()
+  const { basket, products, items, isError, isPending, refetch } = useCheckoutBasket()
   const draft = useOrderDraftStore()
   const configuration = useCheckoutConfiguration({ basket, products, draft })
 
@@ -24,7 +24,7 @@ export function useCheckoutJourney() {
       affectedProductIds:
         affectedProductIds.length > 0
           ? affectedProductIds
-          : basket.lines.map((line) => line.productId),
+          : basket.items.map((item) => item.productId),
     })
     await refetch()
     basket.reconcile(products.value)
@@ -42,7 +42,7 @@ export function useCheckoutJourney() {
 
   const submission = useCheckoutSubmission({
     products,
-    basketLines: computed(() => basket.lines),
+    basketItems: computed(() => basket.items),
     configuration: computed(() => draft.configuration),
     onSuccess: () => {
       basket.clear()
@@ -94,23 +94,23 @@ export function useCheckoutJourney() {
     if (draft.step === 'configuration') {
       return {
         kind: 'configuration' as const,
-        lines: lines.value,
+        items: items.value,
         configuration: draft.configuration,
         summary: configuration.summary.value,
         issues: configuration.issues.value,
-        updateLine: configuration.updateLine,
+        updateItem: configuration.updateItem,
         updateShipping: configuration.updateShipping,
         updateGiftOptions: configuration.updateGiftOptions,
         continueToCustomerDetails: configuration.continueToCustomerDetails,
         reviewBasket,
-        removeLine: configuration.removeLine,
+        removeItem: configuration.removeItem,
       }
     }
 
     return {
       kind: 'customer-details' as const,
       customerDetails: draft.customerDetails,
-      lines: lines.value,
+      items: items.value,
       configuration: draft.configuration,
       summary: configuration.summary.value,
       isSubmitting: submission.isSubmitting.value,

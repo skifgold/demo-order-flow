@@ -12,7 +12,7 @@ import {
 } from '../domain/order-configuration'
 import { useOrderDraftStore } from '../draft/order-draft.store'
 
-export type UpdateConfigurationLine = {
+export type UpdateConfigurationItem = {
   productId: string
   field: keyof PrintConfiguration
   value: string
@@ -30,32 +30,32 @@ export function useCheckoutConfiguration({
   const summary = computed(() =>
     calculateOrderSummary({
       products: products.value,
-      basketLines: basket.lines,
+      basketItems: basket.items,
       configuration: draft.configuration,
     }),
   )
   const issues = ref<readonly ConfigurationIssue[]>([])
 
   function reconcileWithBasket(): void {
-    if (products.value.length > 0 && basket.lines.length > 0) {
-      draft.reconcileWithBasket({ products: products.value, basketLines: basket.lines })
+    if (products.value.length > 0 && basket.items.length > 0) {
+      draft.reconcileWithBasket({ products: products.value, basketItems: basket.items })
     }
   }
 
-  watch([products, () => basket.lines], reconcileWithBasket, { immediate: true, deep: true })
+  watch([products, () => basket.items], reconcileWithBasket, { immediate: true, deep: true })
 
   function clearIssues(): void {
     issues.value = []
   }
 
-  function updateLine({ productId, field, value }: UpdateConfigurationLine): void {
+  function updateItem({ productId, field, value }: UpdateConfigurationItem): void {
     const product = products.value.find((candidate) => candidate.id === productId)
 
     if (product === undefined) {
       return
     }
 
-    draft.setLineConfiguration({
+    draft.setItemConfiguration({
       product,
       productId,
       patch: { [field]: value } as Partial<PrintConfiguration>,
@@ -74,20 +74,20 @@ export function useCheckoutConfiguration({
     clearIssues()
   }
 
-  function removeLine(productId: string): void {
+  function removeItem(productId: string): void {
     basket.remove(productId)
     reconcileWithBasket()
     clearIssues()
   }
 
   function checkpointConfiguration(): void {
-    draft.checkpointConfiguration({ products: products.value, basketLines: basket.lines })
+    draft.checkpointConfiguration({ products: products.value, basketItems: basket.items })
   }
 
   function continueToCustomerDetails(): void {
     issues.value = draft.advanceToCustomerDetails({
       products: products.value,
-      basketLines: basket.lines,
+      basketItems: basket.items,
     }).issues
   }
 
@@ -96,10 +96,10 @@ export function useCheckoutConfiguration({
     checkpointConfiguration,
     issues,
     reconcileWithBasket,
-    removeLine,
+    removeItem,
     summary,
     updateGiftOptions,
-    updateLine,
+    updateItem,
     updateShipping,
   }
 }

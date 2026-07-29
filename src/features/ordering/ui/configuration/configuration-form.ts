@@ -3,11 +3,11 @@ import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { z } from 'zod'
 
 import type { OrderConfiguration, PrintConfiguration } from '../../domain/order-configuration'
-import type { CheckoutLine } from '../checkout/checkout-line'
+import type { CheckoutItem } from '../checkout/checkout-item'
 import { createFormFieldIds } from '../form/use-form-issues'
 
 export function configurationFieldName(productId: string, field: keyof PrintConfiguration): string {
-  return `line-${productId}-${field}`
+  return `item-${productId}-${field}`
 }
 
 const configurationFieldIds = createFormFieldIds('configuration')
@@ -15,45 +15,45 @@ const configurationFieldIds = createFormFieldIds('configuration')
 export const configurationFieldId = configurationFieldIds.fieldId
 export const configurationFieldErrorId = configurationFieldIds.errorId
 
-export function configurationLineField(productId: string, field: keyof PrintConfiguration): string {
-  return `lines.${productId}.${field}`
+export function configurationItemField(productId: string, field: keyof PrintConfiguration): string {
+  return `items.${productId}.${field}`
 }
 
-export function configurationLineFieldId(
+export function configurationItemFieldId(
   productId: string,
   field: keyof PrintConfiguration,
 ): string {
-  return configurationFieldId(configurationLineField(productId, field))
+  return configurationFieldId(configurationItemField(productId, field))
 }
 
 export function useConfigurationForm(
-  lines: Ref<readonly CheckoutLine[]>,
+  items: Ref<readonly CheckoutItem[]>,
   configuration: Ref<OrderConfiguration>,
 ) {
   const resolver = computed(() => {
     const schemaShape = Object.fromEntries(
-      lines.value.flatMap((line) => {
-        const lineConfiguration = configuration.value.lines[line.product.id] ?? {}
+      items.value.flatMap((item) => {
+        const itemConfiguration = configuration.value.items[item.product.id] ?? {}
         const fields: [string, z.ZodType<string>][] = [
           [
-            configurationFieldName(line.product.id, 'presentation'),
+            configurationFieldName(item.product.id, 'presentation'),
             z.string().min(1, 'Choose a presentation.'),
           ],
-          [configurationFieldName(line.product.id, 'size'), z.string().min(1, 'Choose a size.')],
+          [configurationFieldName(item.product.id, 'size'), z.string().min(1, 'Choose a size.')],
           [
-            configurationFieldName(line.product.id, 'finish'),
+            configurationFieldName(item.product.id, 'finish'),
             z.string().min(1, 'Choose a paper finish.'),
           ],
         ]
 
-        if (lineConfiguration.presentation === 'framed') {
+        if (itemConfiguration.presentation === 'framed') {
           fields.push(
             [
-              configurationFieldName(line.product.id, 'frame'),
+              configurationFieldName(item.product.id, 'frame'),
               z.string().min(1, 'Choose a frame style.'),
             ],
             [
-              configurationFieldName(line.product.id, 'glazing'),
+              configurationFieldName(item.product.id, 'glazing'),
               z.string().min(1, 'Choose a glazing option.'),
             ],
           )
@@ -68,17 +68,17 @@ export function useConfigurationForm(
 
   const initialValues = computed(() =>
     Object.fromEntries(
-      lines.value.flatMap((line) => {
-        const lineConfiguration = configuration.value.lines[line.product.id] ?? {}
+      items.value.flatMap((item) => {
+        const itemConfiguration = configuration.value.items[item.product.id] ?? {}
         return [
           [
-            configurationFieldName(line.product.id, 'presentation'),
-            lineConfiguration.presentation ?? '',
+            configurationFieldName(item.product.id, 'presentation'),
+            itemConfiguration.presentation ?? '',
           ],
-          [configurationFieldName(line.product.id, 'size'), lineConfiguration.size ?? ''],
-          [configurationFieldName(line.product.id, 'finish'), lineConfiguration.finish ?? ''],
-          [configurationFieldName(line.product.id, 'frame'), lineConfiguration.frame ?? ''],
-          [configurationFieldName(line.product.id, 'glazing'), lineConfiguration.glazing ?? ''],
+          [configurationFieldName(item.product.id, 'size'), itemConfiguration.size ?? ''],
+          [configurationFieldName(item.product.id, 'finish'), itemConfiguration.finish ?? ''],
+          [configurationFieldName(item.product.id, 'frame'), itemConfiguration.frame ?? ''],
+          [configurationFieldName(item.product.id, 'glazing'), itemConfiguration.glazing ?? ''],
         ]
       }),
     ),

@@ -11,7 +11,7 @@ import type {
   OrderSummary,
 } from '../../domain/order-configuration'
 import CheckoutProgress from '../checkout/CheckoutProgress.vue'
-import type { CheckoutLine } from '../checkout/checkout-line'
+import type { CheckoutItem } from '../checkout/checkout-item'
 import type { FormIssue } from '../form/use-form-issues'
 
 import CustomerDetailsFields from './CustomerDetailsFields.vue'
@@ -22,7 +22,7 @@ import type { SubmissionRecovery } from './submission-recovery'
 
 const props = defineProps<{
   customerDetails: CustomerDetails
-  lines: readonly CheckoutLine[]
+  items: readonly CheckoutItem[]
   configuration: OrderConfiguration
   summary: OrderSummary
   isSubmitting: boolean
@@ -41,9 +41,9 @@ const emit = defineEmits<{
 
 const form = ref<FormInstance>()
 const affectedArtworkNames = computed(() =>
-  props.lines
-    .filter((line) => props.highlightedProductIds?.includes(line.product.id))
-    .map((line) => line.product.name),
+  props.items
+    .filter((item) => props.highlightedProductIds?.includes(item.product.id))
+    .map((item) => item.product.name),
 )
 const hasRetryAction = computed(
   () => props.recovery?.kind === 'network' || props.recovery?.kind === 'system',
@@ -143,7 +143,7 @@ function onSubmit(event: FormSubmitEvent): void {
           </footer>
         </div>
         <CustomerOrderReview
-          :lines="lines"
+          :items="items"
           :configuration="configuration"
           :summary="summary"
           :disabled="isSubmitting || isSubmissionBlocked"

@@ -34,7 +34,7 @@ describe('CheckoutView', () => {
     const summary = wrapper.get('[aria-label="Configuration errors"]')
     expect(summary.findAll('a')).toHaveLength(3)
     expect(summary.find('a').attributes('href')).toBe(
-      '#configuration-lines-modern-geometry-07-presentation',
+      '#configuration-items-modern-geometry-07-presentation',
     )
     await expectFocusOn(summary.element)
     expect(wrapper.find('#customer-details-title').exists()).toBe(false)
@@ -46,13 +46,13 @@ describe('CheckoutView', () => {
     await waitForConfiguration(wrapper)
     await selectConfigurationValue(
       wrapper,
-      'configuration-lines-modern-geometry-07-presentation',
+      'configuration-items-modern-geometry-07-presentation',
       'print-only',
     )
-    await selectConfigurationValue(wrapper, 'configuration-lines-modern-geometry-07-size', 'A4')
+    await selectConfigurationValue(wrapper, 'configuration-items-modern-geometry-07-size', 'A4')
     await wrapper.get('[data-testid="continue-to-details"]').trigger('click')
 
-    await expectFocusOn(wrapper.get('#configuration-lines-modern-geometry-07-finish').element)
+    await expectFocusOn(wrapper.get('#configuration-items-modern-geometry-07-finish').element)
 
     await choosePrintOnlyA4Matte(wrapper)
     await wrapper.get('[data-testid="continue-to-details"]').trigger('click')
@@ -89,7 +89,7 @@ describe('CheckoutView', () => {
     await wrapper.get('[data-testid="remove-artwork-modern-geometry-07"]').trigger('click')
 
     await vi.waitFor(() => {
-      expect(basket.lines).toEqual([{ productId: 'coastal-light', quantity: 1 }])
+      expect(basket.items).toEqual([{ productId: 'coastal-light', quantity: 1 }])
     })
     expect(wrapper.find('[data-testid="remove-artwork-coastal-light"]').exists()).toBe(true)
     expect(wrapper.find('#empty-basket-title').exists()).toBe(false)
@@ -121,7 +121,7 @@ describe('CheckoutView', () => {
         .findAllComponents(PresentationChoice)
         .find(
           (candidate) =>
-            candidate.props('inputId') === 'configuration-lines-modern-geometry-07-presentation',
+            candidate.props('inputId') === 'configuration-items-modern-geometry-07-presentation',
         )
 
       expect(presentation?.props('modelValue')).toBe('print-only')

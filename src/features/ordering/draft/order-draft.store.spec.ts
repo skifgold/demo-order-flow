@@ -8,24 +8,24 @@ import { useOrderDraftStore } from './order-draft.store'
 describe('Order Draft store', () => {
   beforeEach(() => setActivePinia(createPinia()))
 
-  it('keeps valid configurations when a Basket quantity changes and adds empty new lines', () => {
+  it('keeps valid configurations when a Basket quantity changes and adds empty new items', () => {
     const draft = useOrderDraftStore()
     const [firstProduct, secondProduct] = catalogueProducts
 
-    draft.setLineConfiguration({
+    draft.setItemConfiguration({
       product: firstProduct!,
       productId: firstProduct!.id,
       patch: { presentation: 'print-only', size: 'A4', finish: 'matte' },
     })
     draft.reconcileWithBasket({
       products: [firstProduct!, secondProduct!],
-      basketLines: [
+      basketItems: [
         { productId: firstProduct!.id, quantity: 4 },
         { productId: secondProduct!.id, quantity: 1 },
       ],
     })
 
-    expect(draft.configuration.lines).toEqual({
+    expect(draft.configuration.items).toEqual({
       [firstProduct!.id]: { presentation: 'print-only', size: 'A4', finish: 'matte' },
       [secondProduct!.id]: {},
     })
@@ -34,20 +34,20 @@ describe('Order Draft store', () => {
   it('advances only after configuration is valid and can explicitly return to configuration', () => {
     const draft = useOrderDraftStore()
     const product = catalogueProducts[0]!
-    const basketLines = [{ productId: product.id, quantity: 1 }]
+    const basketItems = [{ productId: product.id, quantity: 1 }]
 
     expect(
-      draft.advanceToCustomerDetails({ products: [product], basketLines }).issues,
+      draft.advanceToCustomerDetails({ products: [product], basketItems }).issues,
     ).toHaveLength(3)
     expect(draft.step).toBe('configuration')
 
-    draft.setLineConfiguration({
+    draft.setItemConfiguration({
       product,
       productId: product.id,
       patch: { presentation: 'print-only', size: 'A4', finish: 'matte' },
     })
 
-    expect(draft.advanceToCustomerDetails({ products: [product], basketLines }).issues).toEqual([])
+    expect(draft.advanceToCustomerDetails({ products: [product], basketItems }).issues).toEqual([])
     expect(draft.step).toBe('customer-details')
 
     draft.returnToConfiguration()
@@ -59,7 +59,7 @@ describe('Order Draft store', () => {
     const product = catalogueProducts[0]!
 
     draft.setGiftOptions({ message: 'For Maya', hidePricesOnPackingSlip: true })
-    draft.setLineConfiguration({
+    draft.setItemConfiguration({
       product,
       productId: product.id,
       patch: {
@@ -72,19 +72,19 @@ describe('Order Draft store', () => {
     })
     draft.checkpointConfiguration({
       products: [product],
-      basketLines: [{ productId: product.id, quantity: 1 }],
+      basketItems: [{ productId: product.id, quantity: 1 }],
     })
 
     expect(draft.configuration.giftOptions).toEqual({
       message: 'For Maya',
       hidePricesOnPackingSlip: true,
     })
-    expect(draft.configuration.lines[product.id]).toMatchObject({ presentation: 'framed' })
+    expect(draft.configuration.items[product.id]).toMatchObject({ presentation: 'framed' })
 
     draft.cancelDraft()
     expect(draft.step).toBe('configuration')
     expect(draft.configuration).toEqual({
-      lines: {},
+      items: {},
       shipping: 'standard',
       giftOptions: { message: '', hidePricesOnPackingSlip: false },
     })
@@ -114,7 +114,7 @@ describe('Order Draft store', () => {
     })
     draft.reconcileWithBasket({
       products: [firstProduct!, secondProduct!],
-      basketLines: [
+      basketItems: [
         { productId: firstProduct!.id, quantity: 1 },
         { productId: secondProduct!.id, quantity: 1 },
       ],

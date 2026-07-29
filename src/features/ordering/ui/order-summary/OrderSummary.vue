@@ -6,7 +6,7 @@ import type {
   OrderSummary as OrderSummaryData,
   ShippingMethod,
 } from '../../domain/order-configuration'
-import type { CheckoutLine } from '../checkout/checkout-line'
+import type { CheckoutItem } from '../checkout/checkout-item'
 
 import OrderOptions from './OrderOptions.vue'
 import OrderSummaryItems from './OrderSummaryItems.vue'
@@ -14,7 +14,7 @@ import OrderSummaryPanel from './OrderSummaryPanel.vue'
 import OrderSummaryTotals from './OrderSummaryTotals.vue'
 
 defineProps<{
-  lines: readonly CheckoutLine[]
+  items: readonly CheckoutItem[]
   configuration: OrderConfiguration
   summary: OrderSummaryData
   issues: readonly ConfigurationIssue[]
@@ -31,7 +31,7 @@ defineEmits<{
     <h2 class="order-summary__title typography typography--title typography--title-large">
       Order summary
     </h2>
-    <OrderSummaryItems :lines="lines" :configuration="configuration" :summary="summary" />
+    <OrderSummaryItems :items="items" :configuration="configuration" :summary="summary" />
     <OrderOptions
       :configuration="configuration"
       :issues="issues"

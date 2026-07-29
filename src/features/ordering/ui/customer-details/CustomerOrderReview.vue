@@ -5,7 +5,7 @@ import Button from 'primevue/button'
 import { formatGbp } from '@/shared/money/format-gbp'
 
 import type { OrderConfiguration, OrderSummary } from '../../domain/order-configuration'
-import type { CheckoutLine } from '../checkout/checkout-line'
+import type { CheckoutItem } from '../checkout/checkout-item'
 import type { FormIssue } from '../form/use-form-issues'
 import OrderSummaryItems from '../order-summary/OrderSummaryItems.vue'
 import OrderSummaryPanel from '../order-summary/OrderSummaryPanel.vue'
@@ -15,7 +15,7 @@ import { CustomerDetailsFormField } from './customer-details-form-fields'
 import CustomerTermsField from './CustomerTermsField.vue'
 
 const props = defineProps<{
-  lines: readonly CheckoutLine[]
+  items: readonly CheckoutItem[]
   configuration: OrderConfiguration
   summary: OrderSummary
   disabled: boolean
@@ -52,7 +52,7 @@ const termsError = computed(
       Order summary
     </h2>
     <OrderSummaryItems
-      :lines="lines"
+      :items="items"
       :configuration="configuration"
       :summary="summary"
       :highlighted-product-ids="highlightedProductIds"

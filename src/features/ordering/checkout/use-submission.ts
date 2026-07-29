@@ -1,6 +1,6 @@
 import { computed, ref, type ComputedRef } from 'vue'
 
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 import { isRequestCancellation } from '@/shared/errors/is-request-cancellation'
 import { NetworkError } from '@/shared/errors/network-error'
@@ -22,13 +22,13 @@ import type { FormIssue } from '../ui/form/use-form-issues'
 
 export function useCheckoutSubmission({
   products,
-  basketLines,
+  basketItems,
   configuration,
   onSuccess,
   onConflict,
 }: {
   products: ComputedRef<readonly Product[]>
-  basketLines: ComputedRef<readonly BasketLine[]>
+  basketItems: ComputedRef<readonly BasketItem[]>
   configuration: ComputedRef<OrderConfiguration>
   onSuccess: () => void
   onConflict: (affectedProductIds: readonly string[]) => Promise<void>
@@ -50,7 +50,7 @@ export function useCheckoutSubmission({
 
     const payload = createOrderPayload({
       products: products.value,
-      basketLines: basketLines.value,
+      basketItems: basketItems.value,
       configuration: configuration.value,
       customerDetails,
     })

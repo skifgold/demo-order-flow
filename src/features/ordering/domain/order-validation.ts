@@ -1,4 +1,4 @@
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 
 import { isExpressEligible, normalizePrintConfiguration } from './configuration'
@@ -15,19 +15,19 @@ function getProductById(products: readonly Product[], productId: string): Produc
 
 export function validateOrderConfiguration({
   products,
-  basketLines,
+  basketItems,
   configuration,
 }: {
   products: readonly Product[]
-  basketLines: readonly BasketLine[]
+  basketItems: readonly BasketItem[]
   configuration: OrderConfiguration
 }): { issues: ConfigurationIssue[] } {
   const issues: ConfigurationIssue[] = []
   const completeConfigurations: (CompletePrintConfiguration | undefined)[] = []
 
-  for (const basketLine of basketLines) {
-    const product = getProductById(products, basketLine.productId)
-    const fieldPrefix = `lines.${basketLine.productId}`
+  for (const basketItem of basketItems) {
+    const product = getProductById(products, basketItem.productId)
+    const fieldPrefix = `items.${basketItem.productId}`
 
     if (product === undefined) {
       issues.push({ field: fieldPrefix, message: 'This Artwork is no longer available.' })
@@ -36,7 +36,7 @@ export function validateOrderConfiguration({
 
     const normalized = normalizePrintConfiguration({
       product,
-      configuration: configuration.lines[basketLine.productId] ?? {},
+      configuration: configuration.items[basketItem.productId] ?? {},
     })
 
     if (normalized.presentation === undefined) {

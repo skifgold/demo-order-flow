@@ -20,7 +20,7 @@ export type {
   OrderConfiguration,
   OrderPayload,
   OrderSummary,
-  OrderSummaryLine,
+  OrderSummaryItem,
   PaperFinish,
   Presentation,
   PrintConfiguration,

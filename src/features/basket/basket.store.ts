@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { z } from 'zod'
 
-export type BasketLine = {
+export type BasketItem = {
   productId: string
   quantity: number
 }
@@ -19,25 +19,27 @@ export type SetBasketQuantityInput = {
 }
 
 const BASKET_STORAGE_KEY = 'demo-order-flow:basket'
-const BASKET_STORAGE_VERSION = 1
+const BASKET_STORAGE_VERSION = 2
 
-function hasUniqueProductIds(lines: readonly BasketLine[]): boolean {
-  return new Set(lines.map((line) => line.productId)).size === lines.length
+function hasUniqueProductIds(items: readonly BasketItem[]): boolean {
+  return new Set(items.map((item) => item.productId)).size === items.length
 }
+
+const BasketItemsSchema = z.array(
+  z.object({
+    productId: z.string().min(1),
+    quantity: z.number().int().positive(),
+  }),
+)
 
 const PersistedBasketSchema = z
   .object({
     version: z.literal(BASKET_STORAGE_VERSION),
-    lines: z.array(
-      z.object({
-        productId: z.string().min(1),
-        quantity: z.number().int().positive(),
-      }),
-    ),
+    items: BasketItemsSchema,
   })
   .strict()
-  .refine((basket) => hasUniqueProductIds(basket.lines), {
-    message: 'A basket cannot contain duplicate product lines.',
+  .refine((basket) => hasUniqueProductIds(basket.items), {
+    message: 'A basket cannot contain duplicate product items.',
   })
 
 function getStorage(): Storage | undefined {
@@ -49,12 +51,12 @@ function getStorage(): Storage | undefined {
 }
 
 export const useBasketStore = defineStore('basket', () => {
-  const lines = ref<BasketLine[]>([])
+  const items = ref<BasketItem[]>([])
   const hasDiscardedPersistedBasket = ref(false)
   const hasHydrated = ref(false)
 
-  const itemCount = computed(() => lines.value.reduce((total, line) => total + line.quantity, 0))
-  const isEmpty = computed(() => lines.value.length === 0)
+  const itemCount = computed(() => items.value.reduce((total, item) => total + item.quantity, 0))
+  const isEmpty = computed(() => items.value.length === 0)
 
   function persist(): void {
     const storage = getStorage()
@@ -64,14 +66,14 @@ export const useBasketStore = defineStore('basket', () => {
     }
 
     try {
-      if (lines.value.length === 0) {
+      if (items.value.length === 0) {
         storage.removeItem(BASKET_STORAGE_KEY)
         return
       }
 
       storage.setItem(
         BASKET_STORAGE_KEY,
-        JSON.stringify({ version: BASKET_STORAGE_VERSION, lines: lines.value }),
+        JSON.stringify({ version: BASKET_STORAGE_VERSION, items: items.value }),
       )
     } catch {
       // A private browsing or quota failure must not prevent selecting Artworks.
@@ -97,17 +99,18 @@ export const useBasketStore = defineStore('basket', () => {
         return
       }
 
-      const persistedBasket = PersistedBasketSchema.safeParse(JSON.parse(serializedBasket))
+      const persistedState = JSON.parse(serializedBasket)
+      const persistedBasket = PersistedBasketSchema.safeParse(persistedState)
 
       if (persistedBasket.success) {
-        lines.value = persistedBasket.data.lines
+        items.value = persistedBasket.data.items
         return
       }
     } catch {
       // Invalid persisted state is handled below.
     }
 
-    lines.value = []
+    items.value = []
     hasDiscardedPersistedBasket.value = true
 
     try {
@@ -118,7 +121,7 @@ export const useBasketStore = defineStore('basket', () => {
   }
 
   function quantityFor(productId: string): number {
-    return lines.value.find((line) => line.productId === productId)?.quantity ?? 0
+    return items.value.find((item) => item.productId === productId)?.quantity ?? 0
   }
 
   function add(productId: string, availableQuantity: number): void {
@@ -126,7 +129,7 @@ export const useBasketStore = defineStore('basket', () => {
   }
 
   function setQuantity({ productId, quantity, availableQuantity }: SetBasketQuantityInput): void {
-    const lineIndex = lines.value.findIndex((line) => line.productId === productId)
+    const itemIndex = items.value.findIndex((item) => item.productId === productId)
 
     if (
       !Number.isInteger(quantity) ||
@@ -137,8 +140,8 @@ export const useBasketStore = defineStore('basket', () => {
     }
 
     if (quantity <= 0) {
-      if (lineIndex !== -1) {
-        lines.value.splice(lineIndex, 1)
+      if (itemIndex !== -1) {
+        items.value.splice(itemIndex, 1)
         persist()
       }
       return
@@ -147,39 +150,39 @@ export const useBasketStore = defineStore('basket', () => {
     const permittedQuantity = Math.min(quantity, availableQuantity)
 
     if (permittedQuantity === 0) {
-      if (lineIndex !== -1) {
-        lines.value.splice(lineIndex, 1)
+      if (itemIndex !== -1) {
+        items.value.splice(itemIndex, 1)
         persist()
       }
       return
     }
 
-    if (lineIndex === -1) {
-      lines.value.push({ productId, quantity: permittedQuantity })
+    if (itemIndex === -1) {
+      items.value.push({ productId, quantity: permittedQuantity })
     } else {
-      lines.value[lineIndex]!.quantity = permittedQuantity
+      items.value[itemIndex]!.quantity = permittedQuantity
     }
 
     persist()
   }
 
   function remove(productId: string): void {
-    const lineIndex = lines.value.findIndex((line) => line.productId === productId)
+    const itemIndex = items.value.findIndex((item) => item.productId === productId)
 
-    if (lineIndex === -1) {
+    if (itemIndex === -1) {
       return
     }
 
-    lines.value.splice(lineIndex, 1)
+    items.value.splice(itemIndex, 1)
     persist()
   }
 
   function clear(): void {
-    if (lines.value.length === 0) {
+    if (items.value.length === 0) {
       return
     }
 
-    lines.value = []
+    items.value = []
     persist()
   }
 
@@ -187,26 +190,26 @@ export const useBasketStore = defineStore('basket', () => {
     const availableQuantityByProductId = new Map(
       products.map((product) => [product.id, product.availableQuantity]),
     )
-    const reconciledLines = lines.value.flatMap((line) => {
-      const availableQuantity = availableQuantityByProductId.get(line.productId)
+    const reconciledItems = items.value.flatMap((item) => {
+      const availableQuantity = availableQuantityByProductId.get(item.productId)
 
       if (availableQuantity === undefined || availableQuantity <= 0) {
         return []
       }
 
-      return [{ productId: line.productId, quantity: Math.min(line.quantity, availableQuantity) }]
+      return [{ productId: item.productId, quantity: Math.min(item.quantity, availableQuantity) }]
     })
 
-    if (JSON.stringify(lines.value) === JSON.stringify(reconciledLines)) {
+    if (JSON.stringify(items.value) === JSON.stringify(reconciledItems)) {
       return
     }
 
-    lines.value = reconciledLines
+    items.value = reconciledItems
     persist()
   }
 
   return {
-    lines,
+    items,
     hasDiscardedPersistedBasket,
     itemCount,
     isEmpty,

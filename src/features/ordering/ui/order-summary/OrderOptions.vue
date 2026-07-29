@@ -32,7 +32,7 @@ const emit = defineEmits<{
   updateGiftOptions: [giftOptions: GiftOptions]
 }>()
 
-const expressEligible = computed(() => isExpressEligible(Object.values(props.configuration.lines)))
+const expressEligible = computed(() => isExpressEligible(Object.values(props.configuration.items)))
 const activeOption = ref<string | null>(null)
 const shippingOptions = computed<readonly SelectFieldOption[]>(() => [
   { label: 'Standard', value: 'standard' },

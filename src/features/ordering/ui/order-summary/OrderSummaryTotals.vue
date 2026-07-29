@@ -14,8 +14,8 @@ const props = withDefaults(
   { showHint: true },
 )
 
-const hasIncompleteLine = computed(() =>
-  props.summary.lines.some((line) => line.lineTotal === undefined),
+const hasIncompleteItem = computed(() =>
+  props.summary.items.some((item) => item.itemTotal === undefined),
 )
 </script>
 
@@ -23,7 +23,7 @@ const hasIncompleteLine = computed(() =>
   <dl class="order-summary-totals typography typography--body-medium">
     <div>
       <dt>Subtotal</dt>
-      <dd>{{ hasIncompleteLine ? '—' : formatGbp(summary.subtotal) }}</dd>
+      <dd>{{ hasIncompleteItem ? '—' : formatGbp(summary.subtotal) }}</dd>
     </div>
     <div>
       <dt>Shipping</dt>
@@ -36,12 +36,12 @@ const hasIncompleteLine = computed(() =>
   <div class="order-summary-totals__total typography typography--title typography--title-medium">
     <span>Total</span>
     <strong class="typography typography--title typography--title-x-large">{{
-      hasIncompleteLine ? '—' : formatGbp(summary.total)
+      hasIncompleteItem ? '—' : formatGbp(summary.total)
     }}</strong>
   </div>
   <p v-if="showHint" class="order-summary-totals__hint typography typography--meta">
     {{
-      hasIncompleteLine
+      hasIncompleteItem
         ? 'Complete every print to see the final total.'
         : 'Includes VAT where applicable'
     }}

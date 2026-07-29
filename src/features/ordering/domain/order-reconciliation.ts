@@ -1,4 +1,4 @@
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 
 import { isExpressEligible, normalizePrintConfiguration } from './configuration'
@@ -11,16 +11,16 @@ function getProductById(products: readonly Product[], productId: string): Produc
 
 export function reconcileOrderConfiguration({
   products,
-  basketLines,
+  basketItems,
   configuration,
 }: {
   products: readonly Product[]
-  basketLines: readonly BasketLine[]
+  basketItems: readonly BasketItem[]
   configuration: OrderConfiguration
 }): OrderConfiguration {
-  const lines = Object.fromEntries(
-    basketLines.flatMap((basketLine) => {
-      const product = getProductById(products, basketLine.productId)
+  const items = Object.fromEntries(
+    basketItems.flatMap((basketItem) => {
+      const product = getProductById(products, basketItem.productId)
 
       if (product === undefined) {
         return []
@@ -28,23 +28,23 @@ export function reconcileOrderConfiguration({
 
       return [
         [
-          basketLine.productId,
+          basketItem.productId,
           normalizePrintConfiguration({
             product,
-            configuration: configuration.lines[basketLine.productId] ?? {},
+            configuration: configuration.items[basketItem.productId] ?? {},
           }),
         ],
       ]
     }),
   ) as Record<string, PrintConfiguration>
 
-  const completeConfigurations = basketLines
-    .map((line) => getProductById(products, line.productId))
+  const completeConfigurations = basketItems
+    .map((item) => getProductById(products, item.productId))
     .filter((product): product is Product => product !== undefined)
-    .map((product) => getCompletePrintConfiguration(product, lines[product.id]))
+    .map((product) => getCompletePrintConfiguration(product, items[product.id]))
 
   return {
-    lines,
+    items,
     shipping:
       configuration.shipping === 'express' && !isExpressEligible(completeConfigurations)
         ? 'standard'

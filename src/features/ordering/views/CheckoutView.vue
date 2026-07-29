@@ -25,22 +25,22 @@ const { screen } = useCheckoutJourney()
 
   <ConfigurationStep
     v-else-if="screen.kind === 'configuration'"
-    :lines="screen.lines"
+    :items="screen.items"
     :configuration="screen.configuration"
     :summary="screen.summary"
     :issues="screen.issues"
-    @update-line="screen.updateLine"
+    @update-item="screen.updateItem"
     @update-shipping="screen.updateShipping"
     @update-gift-options="screen.updateGiftOptions"
     @continue="screen.continueToCustomerDetails"
     @review-basket="screen.reviewBasket"
-    @remove-line="screen.removeLine"
+    @remove-item="screen.removeItem"
   />
 
   <CustomerDetailsStep
     v-else-if="screen.kind === 'customer-details'"
     :customer-details="screen.customerDetails"
-    :lines="screen.lines"
+    :items="screen.items"
     :configuration="screen.configuration"
     :summary="screen.summary"
     :is-submitting="screen.isSubmitting"

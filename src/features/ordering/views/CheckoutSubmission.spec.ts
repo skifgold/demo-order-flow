@@ -264,7 +264,7 @@ describe('Checkout submission', () => {
     expect(wrapper.get('[role="alert"]').classes()).toContain('submission-recovery')
     await expectFocusOn(wrapper.get('[role="alert"]').element)
     expect(wrapper.get('[data-testid="submit-order"]').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('.order-summary-items__line--affected').exists()).toBe(true)
+    expect(wrapper.find('.order-summary-items__item--affected').exists()).toBe(true)
     expect(productRequestCount).toBeGreaterThanOrEqual(2)
 
     await wrapper.get('[role="alert"] button').trigger('click')

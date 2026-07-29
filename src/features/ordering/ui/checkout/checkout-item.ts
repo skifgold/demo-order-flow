@@ -1,6 +1,6 @@
 import type { Product } from '@/features/catalogue'
 
-export type CheckoutLine = {
+export type CheckoutItem = {
   product: Product
   quantity: number
 }

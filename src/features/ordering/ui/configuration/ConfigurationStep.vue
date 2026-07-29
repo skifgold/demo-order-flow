@@ -12,7 +12,7 @@ import type {
   ShippingMethod,
 } from '../../domain/order-configuration'
 import CheckoutProgress from '../checkout/CheckoutProgress.vue'
-import type { CheckoutLine } from '../checkout/checkout-line'
+import type { CheckoutItem } from '../checkout/checkout-item'
 import ConfigurationErrorSummary from './ConfigurationErrorSummary.vue'
 import { configurationFieldId, useConfigurationForm } from './configuration-form'
 import OrderSummaryPanel from '../order-summary/OrderSummary.vue'
@@ -20,27 +20,27 @@ import PrintConfigurationCard from './PrintConfigurationCard.vue'
 import { useFormIssueFocus } from '../form/use-form-issues'
 
 const props = defineProps<{
-  lines: readonly CheckoutLine[]
+  items: readonly CheckoutItem[]
   configuration: OrderConfiguration
   summary: OrderSummary
   issues: readonly ConfigurationIssue[]
 }>()
 
 defineEmits<{
-  updateLine: [input: { productId: string; field: keyof PrintConfiguration; value: string }]
+  updateItem: [input: { productId: string; field: keyof PrintConfiguration; value: string }]
   updateShipping: [shipping: ShippingMethod]
   updateGiftOptions: [giftOptions: GiftOptions]
   continue: []
   reviewBasket: []
-  removeLine: [productId: string]
+  removeItem: [productId: string]
 }>()
 
-const lines = toRef(props, 'lines')
+const items = toRef(props, 'items')
 const configuration = toRef(props, 'configuration')
 const issues = toRef(props, 'issues')
 const errorSummary = ref<{ focus: () => void }>()
-const formKey = computed(() => props.lines.map((line) => line.product.id).join('-'))
-const { initialValues, resolver } = useConfigurationForm(lines, configuration)
+const formKey = computed(() => props.items.map((item) => item.product.id).join('-'))
+const { initialValues, resolver } = useConfigurationForm(items, configuration)
 
 useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
 </script>
@@ -70,14 +70,14 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
           <ConfigurationErrorSummary v-if="issues.length > 1" ref="errorSummary" :issues="issues" />
 
           <PrintConfigurationCard
-            v-for="line in lines"
-            :key="line.product.id"
-            :product="line.product"
-            :quantity="line.quantity"
-            :configuration="configuration.lines[line.product.id] ?? {}"
+            v-for="item in items"
+            :key="item.product.id"
+            :product="item.product"
+            :quantity="item.quantity"
+            :configuration="configuration.items[item.product.id] ?? {}"
             :issues="issues"
-            @update="$emit('updateLine', { productId: line.product.id, ...$event })"
-            @remove="$emit('removeLine', line.product.id)"
+            @update="$emit('updateItem', { productId: item.product.id, ...$event })"
+            @remove="$emit('removeItem', item.product.id)"
           />
 
           <footer class="configuration-step__actions">
@@ -100,7 +100,7 @@ useFormIssueFocus({ issues, errorSummary, getFieldId: configurationFieldId })
         </div>
 
         <OrderSummaryPanel
-          :lines="lines"
+          :items="items"
           :configuration="configuration"
           :summary="summary"
           :issues="issues"

@@ -13,17 +13,17 @@ describe('Basket store', () => {
     window.localStorage.clear()
   })
 
-  it('adds, updates, removes, and clears Basket Lines without persisting Product metadata', () => {
+  it('adds, updates, removes, and clears Basket Items without persisting Product metadata', () => {
     const basket = useBasketStore()
 
     basket.add('modern-geometry-07', 8)
     basket.setQuantity({ productId: 'modern-geometry-07', quantity: 3, availableQuantity: 8 })
 
-    expect(basket.lines).toEqual([{ productId: 'modern-geometry-07', quantity: 3 }])
+    expect(basket.items).toEqual([{ productId: 'modern-geometry-07', quantity: 3 }])
     expect(basket.itemCount).toBe(3)
     expect(JSON.parse(window.localStorage.getItem(basketStorageKey) ?? '{}')).toEqual({
-      version: 1,
-      lines: [{ productId: 'modern-geometry-07', quantity: 3 }],
+      version: 2,
+      items: [{ productId: 'modern-geometry-07', quantity: 3 }],
     })
 
     basket.remove('modern-geometry-07')
@@ -32,16 +32,16 @@ describe('Basket store', () => {
     basket.add('coastal-light', 4)
     basket.clear()
 
-    expect(basket.lines).toEqual([])
+    expect(basket.items).toEqual([])
     expect(window.localStorage.getItem(basketStorageKey)).toBeNull()
   })
 
-  it('hydrates a supported version of persisted Basket Lines once', () => {
+  it('hydrates a supported version of persisted Basket Items once', () => {
     window.localStorage.setItem(
       basketStorageKey,
       JSON.stringify({
-        version: 1,
-        lines: [{ productId: 'coastal-light', quantity: 2 }],
+        version: 2,
+        items: [{ productId: 'coastal-light', quantity: 2 }],
       }),
     )
     const basket = useBasketStore()
@@ -49,7 +49,7 @@ describe('Basket store', () => {
     basket.hydrate()
     basket.hydrate()
 
-    expect(basket.lines).toEqual([{ productId: 'coastal-light', quantity: 2 }])
+    expect(basket.items).toEqual([{ productId: 'coastal-light', quantity: 2 }])
     expect(basket.hasDiscardedPersistedBasket).toBe(false)
   })
 
@@ -59,21 +59,21 @@ describe('Basket store', () => {
 
     malformedBasket.hydrate()
 
-    expect(malformedBasket.lines).toEqual([])
+    expect(malformedBasket.items).toEqual([])
     expect(malformedBasket.hasDiscardedPersistedBasket).toBe(true)
     expect(window.localStorage.getItem(basketStorageKey)).toBeNull()
 
     setActivePinia(createPinia())
-    window.localStorage.setItem(basketStorageKey, JSON.stringify({ version: 2, lines: [] }))
+    window.localStorage.setItem(basketStorageKey, JSON.stringify({ version: 3, items: [] }))
     const unsupportedBasket = useBasketStore()
 
     unsupportedBasket.hydrate()
 
-    expect(unsupportedBasket.lines).toEqual([])
+    expect(unsupportedBasket.items).toEqual([])
     expect(unsupportedBasket.hasDiscardedPersistedBasket).toBe(true)
   })
 
-  it('reconciles restored lines against current Products and their availability', () => {
+  it('reconciles restored items against current Products and their availability', () => {
     const basket = useBasketStore()
     basket.add('modern-geometry-07', 8)
     basket.setQuantity({ productId: 'modern-geometry-07', quantity: 7, availableQuantity: 8 })
@@ -84,10 +84,10 @@ describe('Basket store', () => {
       { id: 'night-reflections', availableQuantity: 3 },
     ])
 
-    expect(basket.lines).toEqual([{ productId: 'modern-geometry-07', quantity: 2 }])
+    expect(basket.items).toEqual([{ productId: 'modern-geometry-07', quantity: 2 }])
     expect(JSON.parse(window.localStorage.getItem(basketStorageKey) ?? '{}')).toEqual({
-      version: 1,
-      lines: [{ productId: 'modern-geometry-07', quantity: 2 }],
+      version: 2,
+      items: [{ productId: 'modern-geometry-07', quantity: 2 }],
     })
   })
 
@@ -97,10 +97,10 @@ describe('Basket store', () => {
     basket.setQuantity({ productId: 'night-reflections', quantity: 9, availableQuantity: 3 })
     basket.add('night-reflections', 3)
 
-    expect(basket.lines).toEqual([{ productId: 'night-reflections', quantity: 3 }])
+    expect(basket.items).toEqual([{ productId: 'night-reflections', quantity: 3 }])
 
     basket.setQuantity({ productId: 'night-reflections', quantity: 1, availableQuantity: 0 })
 
-    expect(basket.lines).toEqual([])
+    expect(basket.items).toEqual([])
   })
 })

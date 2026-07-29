@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import { catalogueProducts } from '@/mocks/catalogue.data'
 
 import {
@@ -55,19 +55,19 @@ describe('order configuration', () => {
       { presentation: 'framed', size: 'A2', finish: 'matte', frame: 'black', glazing: 'acrylic' },
       16800,
     ],
-  ] as const)('applies the correct pricing modifier for %o', (lineConfiguration, unitPrice) => {
+  ] as const)('applies the correct pricing modifier for %o', (itemConfiguration, unitPrice) => {
     const product = catalogueProducts[0]!
     const summary = calculateOrderSummary({
       products: [product],
-      basketLines: [{ productId: product.id, quantity: 1 }],
+      basketItems: [{ productId: product.id, quantity: 1 }],
       configuration: {
-        lines: { [product.id]: lineConfiguration },
+        items: { [product.id]: itemConfiguration },
         shipping: 'standard',
         giftOptions: { message: '', hidePricesOnPackingSlip: false },
       },
     })
 
-    expect(summary.lines[0]!.unitPrice).toBe(unitPrice)
+    expect(summary.items[0]!.unitPrice).toBe(unitPrice)
     expect(summary.shippingCost).toBe(695)
   })
 
@@ -75,9 +75,9 @@ describe('order configuration', () => {
     const product = catalogueProducts[0]!
     const summary = calculateOrderSummary({
       products: [product],
-      basketLines: [{ productId: product.id, quantity: 2 }],
+      basketItems: [{ productId: product.id, quantity: 2 }],
       configuration: {
-        lines: { [product.id]: framedA3 },
+        items: { [product.id]: framedA3 },
         shipping: 'express',
         giftOptions: { message: '', hidePricesOnPackingSlip: false },
       },
@@ -88,7 +88,7 @@ describe('order configuration', () => {
       subtotal: 26600,
       shippingCost: 1295,
       total: 27895,
-      lines: [{ productId: product.id, unitPrice: 13300, lineTotal: 26600 }],
+      items: [{ productId: product.id, unitPrice: 13300, itemTotal: 26600 }],
     })
   })
 
@@ -116,7 +116,7 @@ describe('order configuration', () => {
     ).toEqual({ presentation: 'print-only', size: 'A3', finish: 'lustre' })
   })
 
-  it('limits Express to fully configured Print-only A4 or A3 lines', () => {
+  it('limits Express to fully configured Print-only A4 or A3 items', () => {
     const product = catalogueProducts[0]!
 
     expect(isExpressEligible([{ presentation: 'print-only', size: 'A4', finish: 'matte' }])).toBe(
@@ -130,12 +130,12 @@ describe('order configuration', () => {
 
     const configuration = createEmptyOrderConfiguration()
     configuration.shipping = 'express'
-    configuration.lines[product.id] = { presentation: 'print-only', size: 'A2', finish: 'matte' }
+    configuration.items[product.id] = { presentation: 'print-only', size: 'A2', finish: 'matte' }
 
     expect(
       validateOrderConfiguration({
         products: [product],
-        basketLines: [{ productId: product.id, quantity: 1 }],
+        basketItems: [{ productId: product.id, quantity: 1 }],
         configuration,
       }).issues,
     ).toContainEqual({
@@ -148,14 +148,14 @@ describe('order configuration', () => {
     const product = catalogueProducts[0]!
     const validation = validateOrderConfiguration({
       products: [product],
-      basketLines: [{ productId: product.id, quantity: 1 }],
+      basketItems: [{ productId: product.id, quantity: 1 }],
       configuration: createEmptyOrderConfiguration(),
     })
 
     expect(validation.issues).toEqual([
-      { field: `lines.${product.id}.presentation`, message: 'Choose a presentation.' },
-      { field: `lines.${product.id}.size`, message: 'Choose a size.' },
-      { field: `lines.${product.id}.finish`, message: 'Choose a paper finish.' },
+      { field: `items.${product.id}.presentation`, message: 'Choose a presentation.' },
+      { field: `items.${product.id}.size`, message: 'Choose a size.' },
+      { field: `items.${product.id}.finish`, message: 'Choose a paper finish.' },
     ])
   })
 
@@ -163,9 +163,9 @@ describe('order configuration', () => {
     const product = catalogueProducts[0]!
     const validation = validateOrderConfiguration({
       products: [product],
-      basketLines: [{ productId: product.id, quantity: 1 }],
+      basketItems: [{ productId: product.id, quantity: 1 }],
       configuration: {
-        lines: { [product.id]: { presentation: 'print-only', size: 'A4', finish: 'matte' } },
+        items: { [product.id]: { presentation: 'print-only', size: 'A4', finish: 'matte' } },
         shipping: 'standard',
         giftOptions: { message: 'x'.repeat(201), hidePricesOnPackingSlip: true },
       },
@@ -176,17 +176,17 @@ describe('order configuration', () => {
     ])
   })
 
-  it('reconciles changed Basket Lines while keeping unchanged valid configurations', () => {
+  it('reconciles changed Basket Items while keeping unchanged valid configurations', () => {
     const [firstProduct, secondProduct] = catalogueProducts
-    const basketLines: BasketLine[] = [
+    const basketItems: BasketItem[] = [
       { productId: firstProduct!.id, quantity: 3 },
       { productId: secondProduct!.id, quantity: 1 },
     ]
     const reconciled = reconcileOrderConfiguration({
       products: [firstProduct!, secondProduct!],
-      basketLines,
+      basketItems,
       configuration: {
-        lines: {
+        items: {
           [firstProduct!.id]: { presentation: 'print-only', size: 'A4', finish: 'matte' },
           removed: framedA3,
         },
@@ -195,7 +195,7 @@ describe('order configuration', () => {
       },
     })
 
-    expect(reconciled.lines).toEqual({
+    expect(reconciled.items).toEqual({
       [firstProduct!.id]: { presentation: 'print-only', size: 'A4', finish: 'matte' },
       [secondProduct!.id]: {},
     })
@@ -203,9 +203,9 @@ describe('order configuration', () => {
 
   it('creates an independent payload snapshot from a valid Basket and configuration', () => {
     const product = catalogueProducts[0]!
-    const basketLines = [{ productId: product.id, quantity: 1 }]
+    const basketItems = [{ productId: product.id, quantity: 1 }]
     const configuration = {
-      lines: {
+      items: {
         [product.id]: {
           presentation: 'print-only' as const,
           size: 'A4' as const,
@@ -226,13 +226,13 @@ describe('order configuration', () => {
     }
     const payload = createOrderPayload({
       products: [product],
-      basketLines,
+      basketItems,
       configuration,
       customerDetails,
     })
 
     expect(payload).toMatchObject({
-      lines: [{ productId: product.id, quantity: 1, unitPrice: 3500 }],
+      items: [{ productId: product.id, quantity: 1, unitPrice: 3500 }],
       shipping: 'standard',
       customer: { fullName: 'Maya Chen', email: 'maya@example.com' },
       totals: { subtotal: 3500, shippingCost: 695, total: 4195 },

@@ -51,8 +51,8 @@ describe('App', () => {
     window.localStorage.setItem(
       basketStorageKey,
       JSON.stringify({
-        version: 1,
-        lines: [{ productId: 'modern-geometry-07', quantity: 99 }],
+        version: 2,
+        items: [{ productId: 'modern-geometry-07', quantity: 99 }],
       }),
     )
     const pinia = createPinia()
@@ -64,7 +64,7 @@ describe('App', () => {
     const basket = useBasketStore(pinia)
 
     await vi.waitFor(() => {
-      expect(basket.lines).toEqual([{ productId: 'modern-geometry-07', quantity: 8 }])
+      expect(basket.items).toEqual([{ productId: 'modern-geometry-07', quantity: 8 }])
     })
   })
 })

@@ -2,21 +2,21 @@
 import { formatGbp } from '@/shared/money/format-gbp'
 
 import type { OrderConfiguration, OrderSummary } from '../../domain/order-configuration'
-import type { CheckoutLine } from '../checkout/checkout-line'
+import type { CheckoutItem } from '../checkout/checkout-item'
 
 const props = defineProps<{
-  lines: readonly CheckoutLine[]
+  items: readonly CheckoutItem[]
   configuration: OrderConfiguration
   summary: OrderSummary
   highlightedProductIds?: readonly string[]
 }>()
 
-function summaryLine(productId: string) {
-  return props.summary.lines.find((line) => line.productId === productId)
+function summaryItem(productId: string) {
+  return props.summary.items.find((item) => item.productId === productId)
 }
 
 function configurationDetails(productId: string): string[] {
-  const configuration = props.configuration.lines[productId]
+  const configuration = props.configuration.items[productId]
 
   if (configuration === undefined || configuration.presentation === undefined) {
     return ['Choose a presentation to see the price.']
@@ -47,27 +47,27 @@ function configurationDetails(productId: string): string[] {
 <template>
   <ul class="order-summary-items">
     <li
-      v-for="line in lines"
-      :key="line.product.id"
+      v-for="item in items"
+      :key="item.product.id"
       :class="{
-        'order-summary-items__line--affected': highlightedProductIds?.includes(line.product.id),
+        'order-summary-items__item--affected': highlightedProductIds?.includes(item.product.id),
       }"
     >
-      <img :src="line.product.imagePath" :alt="`Artwork: ${line.product.name}`" />
+      <img :src="item.product.imagePath" :alt="`Artwork: ${item.product.name}`" />
       <div>
-        <strong>{{ line.product.name }}</strong>
-        <span class="typography typography--body-medium">Qty: {{ line.quantity }}</span>
+        <strong>{{ item.product.name }}</strong>
+        <span class="typography typography--body-medium">Qty: {{ item.quantity }}</span>
         <span
-          v-for="detail in configurationDetails(line.product.id)"
+          v-for="detail in configurationDetails(item.product.id)"
           :key="detail"
           class="typography typography--body-medium"
           >{{ detail }}</span
         >
       </div>
       <strong>{{
-        summaryLine(line.product.id)?.lineTotal === undefined
+        summaryItem(item.product.id)?.itemTotal === undefined
           ? '—'
-          : formatGbp(summaryLine(line.product.id)!.lineTotal!)
+          : formatGbp(summaryItem(item.product.id)!.itemTotal!)
       }}</strong>
     </li>
   </ul>
@@ -91,7 +91,7 @@ function configurationDetails(productId: string): string[] {
   border-bottom: 1px solid var(--color-border);
 }
 
-.order-summary-items__line--affected {
+.order-summary-items__item--affected {
   padding: var(--space-3);
   margin-inline: calc(-1 * var(--space-3));
   background: var(--color-warning-surface);

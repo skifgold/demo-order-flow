@@ -1,4 +1,4 @@
-import type { BasketLine } from '@/features/basket'
+import type { BasketItem } from '@/features/basket'
 import type { Product } from '@/features/catalogue'
 
 import { normalizePrintConfiguration } from './configuration'
@@ -79,15 +79,15 @@ function calculateUnitPrice(product: Product, configuration: CompletePrintConfig
 
 export function calculateOrderSummary({
   products,
-  basketLines,
+  basketItems,
   configuration,
 }: {
   products: readonly Product[]
-  basketLines: readonly BasketLine[]
+  basketItems: readonly BasketItem[]
   configuration: OrderConfiguration
 }): OrderSummary {
-  const lines = basketLines.flatMap((basketLine) => {
-    const product = getProductById(products, basketLine.productId)
+  const items = basketItems.flatMap((basketItem) => {
+    const product = getProductById(products, basketItem.productId)
 
     if (product === undefined) {
       return []
@@ -95,7 +95,7 @@ export function calculateOrderSummary({
 
     const completeConfiguration = getCompletePrintConfiguration(
       product,
-      configuration.lines[product.id],
+      configuration.items[product.id],
     )
     const unitPrice =
       completeConfiguration === undefined
@@ -105,17 +105,17 @@ export function calculateOrderSummary({
     return [
       {
         productId: product.id,
-        quantity: basketLine.quantity,
+        quantity: basketItem.quantity,
         unitPrice,
-        lineTotal: unitPrice === undefined ? undefined : unitPrice * basketLine.quantity,
+        itemTotal: unitPrice === undefined ? undefined : unitPrice * basketItem.quantity,
       },
     ]
   })
-  const subtotal = lines.reduce((total, line) => total + (line.lineTotal ?? 0), 0)
+  const subtotal = items.reduce((total, item) => total + (item.itemTotal ?? 0), 0)
   const shippingCost = SHIPPING_COST[configuration.shipping]
 
   return {
-    lines,
+    items,
     subtotal,
     shippingCost,
     total: subtotal + shippingCost,

@@ -6,13 +6,13 @@ import { ServerError } from '@/shared/errors/server-error'
 import { postOrder } from './post-order'
 
 const payload: OrderPayload = {
-  lines: [
+  items: [
     {
       productId: 'coastal-light',
       quantity: 1,
       configuration: { presentation: 'print-only', size: 'A4', finish: 'matte' },
       unitPrice: 3500,
-      lineTotal: 3500,
+      itemTotal: 3500,
     },
   ],
   shipping: 'standard',
@@ -75,7 +75,7 @@ describe('postOrder', () => {
     })
   })
 
-  it('throws a typed conflict with affected Basket Lines', async () => {
+  it('throws a typed conflict with affected Basket Items', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn<typeof fetch>().mockResolvedValue(

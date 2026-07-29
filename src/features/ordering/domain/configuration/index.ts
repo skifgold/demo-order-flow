@@ -7,7 +7,7 @@ export { getSupportedSizes } from './size-rules'
 
 export function createEmptyOrderConfiguration(): OrderConfiguration {
   return {
-    lines: {},
+    items: {},
     shipping: 'standard',
     giftOptions: { message: '', hidePricesOnPackingSlip: false },
   }
