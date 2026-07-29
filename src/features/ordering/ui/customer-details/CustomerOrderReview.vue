@@ -19,6 +19,7 @@ const props = defineProps<{
   configuration: OrderConfiguration
   summary: OrderSummary
   disabled: boolean
+  isSubmitting: boolean
   showSubmitAction: boolean
   issues: readonly FormIssue[]
   highlightedProductIds?: readonly string[]
@@ -72,7 +73,7 @@ const termsError = computed(
       data-testid="submit-order"
       :label="'Place order · ' + formatGbp(summary.total)"
       :disabled="disabled"
-      :loading="disabled"
+      :loading="isSubmitting"
       type="submit"
     />
     <p class="customer-order-review__reassurance typography typography--meta">

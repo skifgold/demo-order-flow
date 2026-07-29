@@ -124,11 +124,15 @@ describe('Checkout submission', () => {
 
   it('prevents duplicate submissions while the first order is pending', async () => {
     let requestCount = 0
+    let resolveOrder: (() => void) | undefined
+    const orderResponse = new Promise<void>((resolve) => {
+      resolveOrder = resolve
+    })
 
     server.use(
       http.post('*/orders', async () => {
         requestCount += 1
-        await delay(80)
+        await orderResponse
         return HttpResponse.json(
           {
             orderNumber: 'ORD-78',
@@ -142,7 +146,29 @@ describe('Checkout submission', () => {
     )
 
     const { wrapper } = await submitValidOrder()
+    await vi.waitFor(() => expect(requestCount).toBe(1))
+
+    for (const field of [
+      'fullName',
+      'email',
+      'phone',
+      'addressLine1',
+      'city',
+      'postcode',
+      'termsAccepted',
+    ]) {
+      expect(wrapper.get(`#customer-details-${field}`).attributes('disabled')).toBeDefined()
+    }
+    expect(wrapper.get('form').attributes('aria-busy')).toBe('true')
+    expect(wrapper.get('[role="status"]').text()).toContain('Placing your order')
+    expect(wrapper.find('.customer-details-step__submission-overlay').exists()).toBe(true)
+    expect(
+      wrapper.get('[data-testid="back-to-configuration"]').attributes('disabled'),
+    ).toBeDefined()
+    expect(wrapper.get('[data-testid="submit-order"]').attributes('disabled')).toBeDefined()
+
     await wrapper.get('[data-testid="submit-order"]').trigger('click')
+    resolveOrder?.()
 
     await vi.waitFor(() =>
       expect(wrapper.get('#order-confirmation-title').text()).toBe('Thank you for your order'),
@@ -171,6 +197,7 @@ describe('Checkout submission', () => {
       )
     })
 
+    await expectFocusOn(wrapper.get('#customer-details-email').element)
     expect(wrapper.find('#order-confirmation-title').exists()).toBe(false)
     expect(basket.isEmpty).toBe(false)
     expect(draft.customerDetails.email).toBe('maya@example.com')

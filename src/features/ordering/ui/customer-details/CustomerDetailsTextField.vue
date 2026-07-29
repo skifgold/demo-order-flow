@@ -34,13 +34,18 @@ defineProps<{
         :autocomplete="autocomplete"
         :disabled="disabled"
         :invalid="$field.invalid || serverError !== undefined"
+        :aria-describedby="
+          $field.invalid || serverError !== undefined
+            ? customerDetailsFieldErrorId(name)
+            : undefined
+        "
         class="customer-details-field__input"
       />
     </label>
     <p
-      v-if="$field.invalid || serverError !== undefined"
       :id="customerDetailsFieldErrorId(name)"
       class="customer-details-field__error typography typography--caption"
+      aria-live="polite"
     >
       {{ serverError ?? $field.error?.message }}
     </p>

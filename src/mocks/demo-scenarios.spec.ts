@@ -17,9 +17,14 @@ describe('demo scenarios', () => {
   })
 
   it('consumes an order scenario once', () => {
-    scheduleDemoScenario('order-conflict')
+    scheduleDemoScenario('order-delay')
 
-    expect(consumeOrderScenario()).toBe('conflict')
+    expect(consumeOrderScenario()).toBe('delay')
+    expect(consumeOrderScenario()).toBeUndefined()
+
+    scheduleDemoScenario('order-validation')
+
+    expect(consumeOrderScenario()).toBe('validation')
     expect(consumeOrderScenario()).toBeUndefined()
   })
 

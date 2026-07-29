@@ -42,7 +42,8 @@ defineEmits<{ continueShopping: [] }>()
 
 <style scoped>
 .order-confirmation {
-  max-width: var(--layout-checkout-state-max-inline-size);
+  max-inline-size: var(--layout-checkout-state-max-inline-size);
+  margin-inline: auto;
   padding: var(--space-8);
   background: var(--color-surface);
   border: 1px solid var(--color-border);

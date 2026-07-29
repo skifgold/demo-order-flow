@@ -8,6 +8,27 @@ async function expectPageToFitViewport(page: Page): Promise<void> {
     .toBe(true)
 }
 
+async function expectCenteredInAppLayout(page: Page, selector: string): Promise<void> {
+  await expect
+    .poll(() =>
+      page.locator(selector).evaluate((element) => {
+        const appLayout = document.querySelector('.app-layout')
+
+        if (appLayout === null) {
+          return false
+        }
+
+        const elementBounds = element.getBoundingClientRect()
+        const layoutBounds = appLayout.getBoundingClientRect()
+        const elementCenter = elementBounds.left + elementBounds.width / 2
+        const layoutCenter = layoutBounds.left + layoutBounds.width / 2
+
+        return Math.abs(elementCenter - layoutCenter) < 1
+      }),
+    )
+    .toBe(true)
+}
+
 async function waitForArtworkImages(page: Page): Promise<void> {
   const images = page
     .getByRole('list', { name: 'Available Artworks' })
@@ -91,6 +112,7 @@ test('completes the happy path without console errors or viewport overflow', asy
 
   await expect(page.getByRole('heading', { name: 'Thank you for your order' })).toBeVisible()
   await expect(page.getByText('ORD-2026-1001')).toBeVisible()
+  await expectCenteredInAppLayout(page, '.order-confirmation')
   await expectPageToFitViewport(page)
   expect(consoleProblems).toEqual([])
 })
@@ -177,6 +199,64 @@ test('recovers from a reviewer-triggered Order Conflict without losing checkout 
   await conflictBanner.getByRole('button', { name: 'Review basket' }).click()
   await expect(page).toHaveURL('/')
   await expect(page.getByRole('heading', { name: 'Artwork catalogue' })).toBeVisible()
+})
+
+test('shows the pending order state during a reviewer-triggered delay', async ({ page }) => {
+  await page.goto('/?demo=true')
+  await expect(
+    page.getByRole('list', { name: 'Available Artworks' }).getByRole('listitem'),
+  ).toHaveCount(6)
+
+  await page.getByRole('button', { name: 'Reviewer scenarios' }).click()
+  await page.getByRole('button', { name: 'Delay order' }).click()
+  await expect(page.getByText('Order delay armed')).toBeVisible()
+
+  await page.getByRole('button', { name: `Add ${productName} to basket` }).click()
+  await page.getByRole('button', { name: 'Checkout' }).click()
+  await configurePrintOnlyA4Matte(page)
+  await fillCustomerDetails(page)
+  await page.getByTestId('submit-order').click()
+
+  const form = page.locator('form.customer-details-step__form')
+  await expect(form).toHaveAttribute('aria-busy', 'true')
+  await expect(page.getByRole('status')).toContainText('Placing your order')
+  await expect(page.locator('.customer-details-step__submission-overlay')).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Full name' })).toBeDisabled()
+  await expect(page.getByRole('checkbox', { name: 'I agree to the terms and' })).toBeDisabled()
+  await expect(page.getByTestId('back-to-configuration')).toBeDisabled()
+  await expect(page.getByTestId('submit-order')).toBeDisabled()
+
+  await expect(page.getByRole('heading', { name: 'Thank you for your order' })).toBeVisible({
+    timeout: 7000,
+  })
+})
+
+test('maps a reviewer-triggered email validation error to the email field', async ({ page }) => {
+  await page.goto('/?demo=true')
+  await expect(
+    page.getByRole('list', { name: 'Available Artworks' }).getByRole('listitem'),
+  ).toHaveCount(6)
+
+  await page.getByRole('button', { name: 'Reviewer scenarios' }).click()
+  await page.getByRole('button', { name: 'Validate email' }).click()
+  await expect(page.getByText('Email validation armed')).toBeVisible()
+
+  await page.getByRole('button', { name: `Add ${productName} to basket` }).click()
+  await page.getByRole('button', { name: 'Checkout' }).click()
+  await configurePrintOnlyA4Matte(page)
+  await fillCustomerDetails(page)
+  await page.getByTestId('submit-order').click()
+
+  const email = page.getByRole('textbox', { name: 'Email address' })
+  await expect(page.getByRole('status')).toContainText('Placing your order')
+  await expect(page.locator('.customer-details-step__submission-overlay')).toBeVisible()
+  await expect(email).toBeDisabled()
+  await expect(page.locator('#customer-details-email-error')).toHaveText(
+    'This email address cannot be used for this order.',
+  )
+  await expect(email).toBeFocused()
+  await expect(email).toBeEnabled()
+  await expect(page.getByTestId('submit-order')).toBeEnabled()
 })
 
 test('uses the reviewer catalogue-failure scenario without reloading the page', async ({

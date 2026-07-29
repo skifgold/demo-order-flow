@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import Form from '@primevue/forms/form'
 import type { FormInstance, FormSubmitEvent } from '@primevue/forms/form'
 import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
 
 import type {
   CustomerDetails,
@@ -46,6 +47,20 @@ const affectedArtworkNames = computed(() =>
 )
 const hasRetryAction = computed(
   () => props.recovery?.kind === 'network' || props.recovery?.kind === 'system',
+)
+
+watch(
+  () => props.serverIssues,
+  async (issues) => {
+    const firstIssue = issues[0]
+
+    if (firstIssue === undefined) {
+      return
+    }
+
+    await nextTick()
+    document.getElementById(`customer-details-${firstIssue.field}`)?.focus()
+  },
 )
 
 function currentCustomerDetails(): CustomerDetails {
@@ -97,6 +112,7 @@ function onSubmit(event: FormSubmitEvent): void {
       class="customer-details-step__form"
       :initial-values="customerDetails"
       :resolver="customerDetailsResolver"
+      :aria-busy="isSubmitting"
       @submit="onSubmit"
     >
       <div class="customer-details-step__layout">
@@ -131,10 +147,25 @@ function onSubmit(event: FormSubmitEvent): void {
           :configuration="configuration"
           :summary="summary"
           :disabled="isSubmitting || isSubmissionBlocked"
+          :is-submitting="isSubmitting"
           :issues="serverIssues"
           :highlighted-product-ids="highlightedProductIds"
           :show-submit-action="!hasRetryAction"
         />
+      </div>
+      <div
+        v-if="isSubmitting"
+        class="customer-details-step__submission-overlay"
+        role="status"
+        aria-live="polite"
+      >
+        <div class="customer-details-step__submission-overlay-content">
+          <ProgressSpinner aria-hidden="true" stroke-width="5" />
+          <strong class="typography typography--title typography--title-small"
+            >Placing your order</strong
+          >
+          <p class="typography typography--body">Please wait while we confirm your order.</p>
+        </div>
       </div>
     </Form>
   </section>
@@ -172,6 +203,45 @@ function onSubmit(event: FormSubmitEvent): void {
   grid-template-columns: minmax(0, 1.65fr) minmax(var(--layout-summary-min-inline-size), 0.95fr);
   gap: 40px;
   align-items: start;
+}
+
+.customer-details-step__form {
+  position: relative;
+}
+
+.customer-details-step__submission-overlay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  cursor: wait;
+  background: rgb(246 242 233 / 88%);
+  backdrop-filter: blur(2px);
+}
+
+.customer-details-step__submission-overlay-content {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  max-width: 320px;
+  padding: var(--space-6);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-ink);
+  border-radius: 6px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 16%);
+}
+
+.customer-details-step__submission-overlay-content p,
+.customer-details-step__submission-overlay-content strong {
+  margin: 0;
+}
+
+.customer-details-step__submission-overlay :deep(.p-progressspinner) {
+  width: 52px;
+  height: 52px;
 }
 
 .customer-details-step__content {

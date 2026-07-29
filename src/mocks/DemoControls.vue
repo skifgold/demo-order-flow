@@ -39,6 +39,18 @@ function scenarioFeedback(scenario: Exclude<DemoScenario, 'catalogue-delay'>) {
         summary: 'Catalogue failure triggered',
         detail: 'The refresh warning will appear after the request fails.',
       } as const
+    case 'order-delay':
+      return {
+        severity: 'info',
+        summary: 'Order delay armed',
+        detail: 'Submit an order to see the form lock while it is pending.',
+      } as const
+    case 'order-validation':
+      return {
+        severity: 'warn',
+        summary: 'Email validation armed',
+        detail: 'Submit an order to show the server error on the email field.',
+      } as const
     case 'order-conflict':
       return {
         severity: 'warn',
@@ -57,7 +69,11 @@ function scenarioFeedback(scenario: Exclude<DemoScenario, 'catalogue-delay'>) {
 
 <template>
   <Toast position="top-right" />
-  <aside class="demo-controls" :class="{ 'demo-controls--open': isOpen }" aria-label="Demo controls">
+  <aside
+    class="demo-controls"
+    :class="{ 'demo-controls--open': isOpen }"
+    aria-label="Demo controls"
+  >
     <Button
       class="demo-controls__toggle"
       :label="isOpen ? 'Hide demo controls' : 'Reviewer scenarios'"
@@ -84,6 +100,18 @@ function scenarioFeedback(scenario: Exclude<DemoScenario, 'catalogue-delay'>) {
           severity="secondary"
           size="small"
           @click="enableScenario('catalogue-failure')"
+        />
+        <Button
+          label="Delay order"
+          severity="secondary"
+          size="small"
+          @click="enableScenario('order-delay')"
+        />
+        <Button
+          label="Validate email"
+          severity="secondary"
+          size="small"
+          @click="enableScenario('order-validation')"
         />
         <Button
           label="Order conflict"

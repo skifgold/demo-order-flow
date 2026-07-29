@@ -5,6 +5,7 @@ import { consumeCatalogueScenario, consumeOrderScenario } from './demo-scenarios
 import { OrderRequestSchema } from '@/features/ordering/api/post-order.contract'
 
 const DEMO_CATALOGUE_DELAY_MS = 5000
+const DEMO_ORDER_SCENARIO_DELAY_MS = 2000
 
 export const handlers = [
   http.get('*/products', async () => {
@@ -24,6 +25,25 @@ export const handlers = [
   }),
   http.post('*/orders', async ({ request }) => {
     const scenario = consumeOrderScenario()
+
+    if (scenario !== undefined) {
+      await delay(DEMO_ORDER_SCENARIO_DELAY_MS)
+    }
+
+    if (scenario === 'validation') {
+      return HttpResponse.json(
+        {
+          type: 'validation',
+          errors: [
+            {
+              field: 'customer.email',
+              message: 'This email address cannot be used for this order.',
+            },
+          ],
+        },
+        { status: 422 },
+      )
+    }
 
     if (scenario === 'conflict') {
       return HttpResponse.json(

@@ -33,15 +33,17 @@ defineProps<{
         I agree to the terms and confirm these details are correct.
       </label>
     </div>
-    <Message
-      v-if="$field.invalid || serverError !== undefined"
-      :id="customerDetailsFieldErrorId(CustomerDetailsFormField.termsAccepted)"
-      severity="error"
-      size="small"
-      variant="simple"
-    >
-      {{ serverError ?? $field.error?.message }}
-    </Message>
+    <div class="customer-terms__error">
+      <Message
+        v-if="$field.invalid || serverError !== undefined"
+        :id="customerDetailsFieldErrorId(CustomerDetailsFormField.termsAccepted)"
+        severity="error"
+        size="small"
+        variant="simple"
+      >
+        {{ serverError ?? $field.error?.message }}
+      </Message>
+    </div>
   </FormField>
 </template>
 
@@ -55,6 +57,14 @@ defineProps<{
 
 .customer-terms label {
   cursor: pointer;
+}
+
+.customer-terms__error {
+  min-block-size: 1.5rem;
+}
+
+.customer-terms__error :deep(.p-message) {
+  margin: 0;
 }
 
 :deep(.p-checkbox) {
